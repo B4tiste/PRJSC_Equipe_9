@@ -10,7 +10,7 @@ graph TB
     
     %% Zone simu
     subgraph one [Simulation]
-        mb1 <-- Serial / UART --> py1[Interfacce Python 1]
+        mb1 <-- Serial / UART --> py1[Interface Python 1]
         py1 <-. API .-> web1((Serveur Java Simulation))
         subgraph app1 [Appli Simulation]
             web1 <-- VueJS --> wv1[[Simulation View]]
