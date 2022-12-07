@@ -2,6 +2,7 @@ package Controllers;
 
 import jakarta.persistence.*;
 
+@Controller
 public interface UrgenceController {
 
     public Long getId();
