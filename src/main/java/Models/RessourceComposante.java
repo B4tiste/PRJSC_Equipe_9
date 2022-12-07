@@ -24,10 +24,9 @@ public class RessourceComposante {
     public RessourceComposante() {
     }
 
-    public RessourceComposante(String nom, boolean isAvailable, Ressource ressource) {
+    public RessourceComposante(String nom, boolean isAvailable) {
         this.nom = nom;
         this.isAvailable = isAvailable;
-        this.ressource = ressource;
     }
 
     public int getId() {
