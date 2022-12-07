@@ -2,17 +2,17 @@ package Models;
 
 
 import jakarta.persistence.*;
-
+import InterfacesDefinition.*;
 import java.sql.Date;
 
 @Entity
 @Table(name = "URGENCE")
-public class Urgence {
+public class Urgence implements IBaseModel  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
-    private int id;
+    private Long id;
 
     @Column(name = "DATE_CREATION")
     private Date dateCreation;
@@ -46,12 +46,12 @@ public class Urgence {
         this.type = type;
         this.statut = statut;
     }
-
-    public int getId() {
+    @Override
+    public Long getId() {
         return id;
     }
-
-    public void setId(int id) {
+    @Override
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -1,15 +1,16 @@
 package Models;
 
 import jakarta.persistence.*;
+import InterfacesDefinition.*;
 
 @Entity
 @Table(name = "TYPE")
-public class Type {
+public class Type implements IBaseModel  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
-    private int id;
+    private Long id;
 
     @Column(name = "NOM")
     private String nom;
@@ -24,12 +25,12 @@ public class Type {
         this.nom = nom;
         this.valeur = valeur;
     }
-
-    public int getId() {
+    @Override
+    public Long getId() {
         return id;
     }
-
-    public void setId(int id) {
+    @Override
+    public void setId(Long id) {
         this.id = id;
     }
 

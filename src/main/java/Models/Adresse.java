@@ -1,15 +1,16 @@
 package Models;
 
 import jakarta.persistence.*;
+import InterfacesDefinition.*;
 
 @Entity
 @Table(name = "ADRESSE")
-public class Adresse {
+public class Adresse implements IBaseModel  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
-    private int id;
+    private Long id;
 
     @Column(name = "RUE_ADRESSE")
     private String rueAdresse;
@@ -36,12 +37,12 @@ public class Adresse {
         this.codePostalAdresse = codePostalAdresse;
         this.paysAdresse = paysAdresse;
     }
-
-    public int getId() {
+    @Override
+    public Long getId() {
         return id;
     }
-
-    public void setId(int id) {
+    @Override
+    public void setId(Long id) {
         this.id = id;
     }
 

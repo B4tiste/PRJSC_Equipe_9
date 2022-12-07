@@ -1,15 +1,17 @@
 package Models;
 
 import jakarta.persistence.*;
+import InterfacesDefinition.*;
+
 
 @Entity
 @Table(name = "RESSOURCECOMPOSANTE")
-public class RessourceComposante {
+public class RessourceComposante implements IBaseModel  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
-    private int id;
+    private Long id;
 
     @Column(name = "NOM")
     private String nom;
@@ -28,12 +30,12 @@ public class RessourceComposante {
         this.nom = nom;
         this.isAvailable = isAvailable;
     }
-
-    public int getId() {
+    @Override
+    public Long getId() {
         return id;
     }
-
-    public void setId(int id) {
+    @Override
+    public void setId(Long id) {
         this.id = id;
     }
 
