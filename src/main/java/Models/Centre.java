@@ -3,10 +3,11 @@ package Models;
 import jakarta.persistence.*;
 
 import java.util.List;
+import InterfacesDefinition.*;
 
 @Entity
 @Table(name = "CENTRE")
-public class Centre {
+public class Centre implements IBaseModel  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -36,11 +37,11 @@ public class Centre {
         this.latitude = latitude;
         this.longitude = longitude;
     }
-
+    @Override
     public Long getId() {
         return id;
     }
-
+    @Override
     public void setId(Long id) {
         this.id = id;
     }

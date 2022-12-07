@@ -1,12 +1,12 @@
 package Models;
 
 import jakarta.persistence.*;
-
+import InterfacesDefinition.*;
 import java.io.Serializable;
 
 @Entity
 @Table(name = "ROLE")
-public class Role {
+public class Role implements IBaseModel  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -26,11 +26,11 @@ public class Role {
         this.nom = nom;
         this.valeur = valeur;
     }
-
+    @Override
     public Long getId() {
         return id;
     }
-
+    @Override
     public void setId(Long id) {
         this.id = id;
     }

@@ -1,6 +1,7 @@
 package Models;
 
 import jakarta.persistence.*;
+import InterfacesDefinition.*;
 
 @Entity
 @Table(name = "VEHICULE")
@@ -23,6 +24,16 @@ public class Vehicule extends RessourceComposante {
         this.capacite = capacite;
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+    @Override
+    public Long getId()
+    {
+        return this.getId();
+    }
+    @Override
+    public void setId(Long id)
+    {
+        this.setId(id);
     }
 
     public Long getCapacite() {
