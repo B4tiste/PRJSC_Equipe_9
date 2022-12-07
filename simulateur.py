@@ -1,6 +1,7 @@
 from tkinter import *
 
 import serial
+import time
 
 # Graphic interface for the send program
 master = Tk()
@@ -15,12 +16,12 @@ for i in range(Nscales):
 # send serial message 
 # Don't forget to establish the right serial port ******** ATTENTION
 # SERIALPORT = "/dev/ttyUSB0"
-SERIALPORT = "COM9"
+SERIALPORT = "COM6"
 BAUDRATE = 115200
 ser = serial.Serial()
 
 def initUART():     
-        if serialButton['text'] == "Open Serial":   
+        if serialButton['text'] == "Open Serial":
             # ser = serial.Serial(SERIALPORT, BAUDRATE)
             ser.port=SERIALPORT
             ser.baudrate=BAUDRATE
@@ -45,24 +46,34 @@ def initUART():
             serialButton['text'] = "Close Serial"
             b['state'] = 'normal'
         else:
+            print(f"Closing serial port : {SERIALPORT}")
             ser.close()
             serialButton['text'] = "Open Serial"
             b['state'] = 'disabled'
 
 
 def sendUARTMessage(msg):
+    msg += "\n"
     ser.write(msg.encode())
     # print("Message <" + msg + "> sent to micro-controller." )
 
 def read_scales():
+    cptScale = 0
     b['state'] = 'disabled'
+    print("Reading values : ")
     for i in range(Nscales):
         column = i-(i//10)*10
         row = i//10
+        messageSent = f"({row},{column},{scales[i].get()})"
         if (scales[i].get()>0) :
-            print("Fire x=%d, y=%d has value %d" %( row, column, scales[i].get()) )
-        sendUARTMessage("(%d,%d,%d)" %(row, column, scales[i].get()))
-    
+            print(f"Active scale {i} : {messageSent}")
+        # print(f"Message sent to the µBit: {messageSent}")
+        sendUARTMessage(messageSent)
+        cptScale += 1
+        # time.sleep(0.5)
+    print(f"Number of scales sent : {cptScale}")
+
+
     b['state'] = 'normal'
 
 b=Button(master,text="Send Values",highlightcolor="blue",command=read_scales, state="disabled") # button to read values
