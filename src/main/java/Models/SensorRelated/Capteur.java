@@ -1,70 +1,50 @@
-package Models;
+package Models.SensorRelated;
 
 import InterfacesDefinition.*;
+import Models.SensorRelated.Microcontroller;
 import jakarta.persistence.*;
 
+import java.util.List;
 
 
 @Entity
 @Table(name = "CAPTEUR")
 public class Capteur implements IBaseModel {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "LATITUDE")
-    private Float latitude;
-
-    @Column(name = "LONGITUDE")
-    private Float longitude;
-
     @Column(name = "IDENTIFIER")
     private String identifier;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CAPTEUR_TYPE")
-    private CapteurType sensorType;
+    @ManyToOne
+    @JoinColumn(name = "ID_MICROCONTROLLER")
+    private Microcontroller microcontroller;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CAPTEUR_ETAT")
-    private CapteurEtat sensorState;
+    @OneToMany(mappedBy = "capteur")
+    private List<CapteurDonnees> capteurDonnees;
+
+    @ManyToOne
+    @JoinColumn(name = "ID_CAPTEUR_TYPE")
+    private CapteurType capteurType;
 
     public Capteur() {
     }
 
-    public Capteur(Float latitude, Float longitude, String identifier, CapteurType sensorType, CapteurEtat sensorState) {
-        this.latitude = latitude;
-        this.longitude = longitude;
+    public Capteur(String identifier, Microcontroller microcontroller, List<CapteurDonnees> capteurDonnees, CapteurType capteurType) {
         this.identifier = identifier;
-        this.sensorType = sensorType;
-        this.sensorState = sensorState;
+        this.microcontroller = microcontroller;
+        this.capteurDonnees = capteurDonnees;
+        this.capteurType = capteurType;
     }
 
-    @Override
     public Long getId() {
         return id;
     }
-    @Override
+
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Float getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Float latitude) {
-        this.latitude = latitude;
-    }
-
-    public Float getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Float longitude) {
-        this.longitude = longitude;
     }
 
     public String getIdentifier() {
@@ -75,19 +55,27 @@ public class Capteur implements IBaseModel {
         this.identifier = identifier;
     }
 
-    public CapteurType getSensorType() {
-        return sensorType;
+    public Microcontroller getMicrocontroller() {
+        return microcontroller;
     }
 
-    public void setSensorType(CapteurType sensorType) {
-        this.sensorType = sensorType;
+    public void setMicrocontroller(Microcontroller microcontroller) {
+        this.microcontroller = microcontroller;
     }
 
-    public CapteurEtat getSensorState() {
-        return sensorState;
+    public List<CapteurDonnees> getCapteurDonnees() {
+        return capteurDonnees;
     }
 
-    public void setSensorState(CapteurEtat sensorState) {
-        this.sensorState = sensorState;
+    public void setCapteurDonnees(List<CapteurDonnees> capteurDonnees) {
+        this.capteurDonnees = capteurDonnees;
+    }
+
+    public CapteurType getCapteurType() {
+        return capteurType;
+    }
+
+    public void setCapteurType(CapteurType capteurType) {
+        this.capteurType = capteurType;
     }
 }
