@@ -1,7 +1,9 @@
 package Controler;
 import Modele.*;
+
 import java.lang.Math;
 import java.util.*;
+import java.util.ArrayList;
 
 public class CalculMain {
 	
@@ -33,6 +35,81 @@ public class CalculMain {
 		System.out.println(appartientToutCercle(intersection[0],tab)) ;
 	*/}
 	
+	private double  anglePoint(double[]point1, double[] point2, double[] point3)
+	{
+		double a = Math.sqrt((Math.pow(point1[0]-point2[0],2))+(Math.pow(point1[1]-point2[1],2)));
+		double b = Math.sqrt((Math.pow(point3[0]-point2[0],2))+(Math.pow(point3[1]-point2[1],2)));
+		double c = Math.sqrt((Math.pow(point1[0]-point3[0],2))+(Math.pow(point1[1]-point3[1],2)));
+		
+		double angle = Math.acos( ( a*a + b*b - c*c ) / ( 2*a*b ) );
+		
+		
+		double theta1 = Math.atan2 ( point1[1] - point2[1], point1[0] - point2[0]);
+		double  theta2 = Math.atan2 ( point3[1] - point2[1], point3[0] - point2[0]);
+		double theta = theta2 - theta1;
+		
+		if (Math.toDegrees(theta  ) <0 )
+		{
+			theta = 360 + Math.toDegrees(theta);
+		}
+		else
+		{
+			theta = Math.toDegrees(theta);
+		}
+		System.out.println( "DBC: " + theta  );
+		return theta;
+	}
+	
+	
+	private ArrayList<Double> anglesPoints(double[] pointRef , List<double[]> myList)
+	{
+		ArrayList<Double> angles = new ArrayList<Double>();
+		
+		for(int i = 1; i < myList.size(); i++)
+		{
+			angles.add(anglePoint(myList.get(0),pointRef , myList.get(i)));
+		}
+		
+		return angles;
+	}
+	
+	private int indexMin(ArrayList<Double> angles)
+	{
+		double min = 381;
+		int index = 0;
+		for (int i = 0; i < angles.size(); i++)
+		{
+			if (min > angles.get(i))
+			{
+				min = angles.get(i);
+				index = i;
+			}
+		}
+		return index;
+	}
+	
+	private List<double[]>  sortPoint(double[]pointRef, List<double[]> myList)
+	{
+		List<double[]> myListTrier = new ArrayList<double[]>();
+		ArrayList<Double> angles = anglesPoints(pointRef ,myList);
+		
+		myListTrier.add(myList.get(0));
+		myList.remove(0);
+		int index;
+		while (myList.size() > 0)
+		{
+			for (int i = 0; i < myList.size(); i++)
+			{
+				index = indexMin(angles);
+				
+				myListTrier.add(myList.get(index));
+				myList.remove(index);
+				angles.remove(index);
+			}
+		}
+		return myListTrier;
+	}
+	
 	private double[] intersection(Trouple tab[])
 	{
 		double couple[];
@@ -61,13 +138,16 @@ public class CalculMain {
 			}
 		}
 		
-		//System.out.println(myList);
-		calculCentreGravite(myList);
+		couple = moyennePoint(myList);
+		myList = sortPoint(couple,myList);
+		
+		//System.out.println("point moyenb : (" + couple[0] + "," + couple[1] + ")" );
+		couple = calculCentreGravite(myList);
 		for (int e = 0; e < myList.size(); e++)
 		{
 			System.out.print("(" + myList.get(e)[0] +","+ myList.get(e)[1] + ") , ");
 		}
-		System.out.println("\n Fini !");
+		System.out.println("");
 		
 		return couple;
 	}
@@ -100,9 +180,9 @@ public class CalculMain {
 		
 		//double couple[];
 		
-		couple = myList.get(2);
+		/*couple = myList.get(2);
 		myList.set(2,myList.get(4));
-		myList.set(4,couple);
+		myList.set(4,couple);*/
 		couple = new double[2];
 		
 		couple[0] = 0;
@@ -113,7 +193,7 @@ public class CalculMain {
 		for (int i = 0; i < myList.size(); i++)
 		{
 			System.out.print("(" + myList.get(i)[0] +","+ myList.get(i)[1] + ") , ");
-			
+			System.out.println("");
 			if (i < myList.size() - 1)
 			{
 				a += (myList.get(i)[0]*myList.get(i+1)[1]) - (myList.get(i+1)[0]*myList.get(i)[1]);
@@ -128,14 +208,14 @@ public class CalculMain {
 				couple[1] += (myList.get(i)[1]+myList.get(0)[1]) * (myList.get(i)[0]*myList.get(0)[1]-myList.get(0)[0]*myList.get(i)[1]);
 				
 			}
-			System.out.println("i : " + i +", a : " + a );
+			//System.out.println("i : " + i +", a : " + a );
 		}
 		
 		a = a /2;
 		couple[0] = couple[0] / (6*a);
 		couple[1] = couple[1] / (6*a);
 		
-		System.out.println("("+couple[0]+ "," + couple[1] + ")");
+		//System.out.println("("+couple[0]+ "," + couple[1] + ")");
 		System.out.println(a);
 		return couple;
 	}
@@ -165,7 +245,7 @@ public class CalculMain {
 			double d = Math.sqrt((Math.pow(tab[i].getx()-point[0],2))+(Math.pow(tab[i].gety()-point[1],2)));
 			if (d > (rayon_max - tab[i].getIntensite()) + 0.1)
 			{
-				System.out.print(i);
+				//System.out.print(i);
 				drap = false;
 			}
 			i++;
