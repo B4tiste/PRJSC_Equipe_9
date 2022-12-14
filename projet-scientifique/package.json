@@ -8,6 +8,9 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@turf/point-grid": "^6.5.0",
+    "@turf/square-grid": "^6.5.0",
+    "@turf/turf": "^6.5.0",
     "core-js": "^3.6.5",
     "vue": "^3.0.0"
   },
