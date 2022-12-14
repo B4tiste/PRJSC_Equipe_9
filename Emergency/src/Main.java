@@ -6,9 +6,6 @@ public class Main {
 		// TODO Auto-generated method stub
 		System.out.println("Hello world");
 		CalculMain calc = new CalculMain();
-		calc.launchCalclul();
-		
-		
 	}
 	
 

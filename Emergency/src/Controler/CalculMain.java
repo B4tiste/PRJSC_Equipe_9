@@ -1,296 +1,219 @@
+/**
+ * @file CalculMain.java
+ * @author vincent.buniazet
+ * @date 13/12/2022
+ * @brief permet de réaliser le calcul d'approximation d'un incendie
+ */
+
 package Controler;
 import Modele.*;
 
 import java.lang.Math;
 import java.util.*;
-import java.util.ArrayList;
+
+import Service.*;
 
 public class CalculMain {
 	
-	private int rayon_max = 9;
+	
+	private int nbPoint = 0;
 	
 	public CalculMain()
 	{
+		double couple[] = new double[2];
+		ApproximerIncendie calc = new ApproximerIncendie();
+		List<Trouple > tab = generateData();
+		tab = retirerValeurNull(tab);
+		tab = trierTabIntensiter(tab);
 		
-	}
-	
-	public void launchCalclul()
-	{
-		double couple[];
-		couple = new double[2];
+		List<Trouple > tabUnIncendie;
 		
-		System.out.println("Je lance le calcul");
-		Trouple tab[] = generateData();
-		for (int i = 0; i < 5; i++)
+		//couple = calc.launchCalclul(tab,tab.size());
+		while (tab.size() > 0)
 		{
-			System.out.println(tab[i]);
-		}
-		
-		couple = intersection(tab);
-		System.out.println(couple[0] + " " + couple[1]);
-		
-		/*double intersection[][];
-		intersection = new double[2][2];
-		intersection = intersectionDeuxCercle(tab[2],tab[4]);
-		System.out.println(appartientToutCercle(intersection[0],tab)) ;
-	*/}
-	
-	private double  anglePoint(double[]point1, double[] point2, double[] point3)
-	{
-		double a = Math.sqrt((Math.pow(point1[0]-point2[0],2))+(Math.pow(point1[1]-point2[1],2)));
-		double b = Math.sqrt((Math.pow(point3[0]-point2[0],2))+(Math.pow(point3[1]-point2[1],2)));
-		double c = Math.sqrt((Math.pow(point1[0]-point3[0],2))+(Math.pow(point1[1]-point3[1],2)));
-		
-		double angle = Math.acos( ( a*a + b*b - c*c ) / ( 2*a*b ) );
-		
-		
-		double theta1 = Math.atan2 ( point1[1] - point2[1], point1[0] - point2[0]);
-		double  theta2 = Math.atan2 ( point3[1] - point2[1], point3[0] - point2[0]);
-		double theta = theta2 - theta1;
-		
-		if (Math.toDegrees(theta  ) <0 )
-		{
-			theta = 360 + Math.toDegrees(theta);
-		}
-		else
-		{
-			theta = Math.toDegrees(theta);
-		}
-		System.out.println( "DBC: " + theta  );
-		return theta;
-	}
-	
-	
-	private ArrayList<Double> anglesPoints(double[] pointRef , List<double[]> myList)
-	{
-		ArrayList<Double> angles = new ArrayList<Double>();
-		
-		for(int i = 1; i < myList.size(); i++)
-		{
-			angles.add(anglePoint(myList.get(0),pointRef , myList.get(i)));
-		}
-		
-		return angles;
-	}
-	
-	private int indexMin(ArrayList<Double> angles)
-	{
-		double min = 381;
-		int index = 0;
-		for (int i = 0; i < angles.size(); i++)
-		{
-			if (min > angles.get(i))
+			tabUnIncendie = selectUnIncendie (tab);
+			//System.out.println("Incendie en : " + "("+couple[0] + " " + couple[1]+")");
+			
+			if (tabUnIncendie.size() > 1)
 			{
-				min = angles.get(i);
+				if(tabUnIncendie.get(0).getIntensite() == tabUnIncendie.get(1).getIntensite())
+				{
+					couple[0] = tabUnIncendie.get(0).getx();
+					couple[1] = tabUnIncendie.get(0).gety();
+				}
+				else
+				{
+					couple = calc.launchCalclul(tabUnIncendie,tabUnIncendie.size());
+				}
+			}
+			else if (tabUnIncendie.size() == 1)
+			{
+				couple[0] = tabUnIncendie.get(0).getx();
+				couple[1] = tabUnIncendie.get(0).gety();
+			}
+			
+			System.out.println("Incendie en : " + "("+couple[0] + " " + couple[1]+") d'une intensité de : " +tabUnIncendie.get(0).getIntensite() );
+		}
+		
+		
+		
+		
+		
+		
+	}
+	
+	private List<Trouple > trierTabIntensiter(List<Trouple > tab)
+	{
+		List<Trouple > tabTrier = new ArrayList<Trouple >();
+		while (tab.size() > 0)
+		{
+			int index  = maxTab(tab);
+			tabTrier.add(tab.get(index));
+			tab.remove(index);
+		}
+		return tabTrier;
+	}
+	
+	private int maxTab(List<Trouple > tab)
+	{
+		int index = 0;
+		double maxVal = tab.get(0).getIntensite();
+		for (int i = 0; i < tab.size(); i++)
+		{
+			if (maxVal < tab.get(i).getIntensite())
+			{
+				maxVal = tab.get(i).getIntensite();
 				index = i;
 			}
 		}
 		return index;
 	}
 	
-	private List<double[]>  sortPoint(double[]pointRef, List<double[]> myList)
+	private int indexPointPlusProche (List<Trouple > tab, Trouple point)
 	{
-		List<double[]> myListTrier = new ArrayList<double[]>();
-		ArrayList<Double> angles = anglesPoints(pointRef ,myList);
-		
-		myListTrier.add(myList.get(0));
-		myList.remove(0);
-		int index;
-		while (myList.size() > 0)
+		int index = -1;
+		boolean drap = false;
+		double distanceMin = Math.sqrt(Math.pow(point.getx() - tab.get(0).getx(), 2) + Math.pow(point.gety() - tab.get(0).gety(), 2) );
+		for (int i = 0; i < tab.size(); i++)
 		{
-			for (int i = 0; i < myList.size(); i++)
+			
+			if (distanceMin >= Math.sqrt(Math.pow(point.getx() - tab.get(i).getx(), 2) + Math.pow(point.gety() - tab.get(i).gety(), 2) ) && Math.sqrt(Math.pow(point.getx() - tab.get(i).getx(), 2) + Math.pow(point.gety() - tab.get(i).gety(), 2) ) < 10)
 			{
-				index = indexMin(angles);
-				
-				myListTrier.add(myList.get(index));
-				myList.remove(index);
-				angles.remove(index);
-			}
-		}
-		return myListTrier;
-	}
-	
-	private double[] intersection(Trouple tab[])
-	{
-		double couple[];
-		couple = new double[2];
-		
-		
-		double intersection[][];
-		intersection = new double[2][2];
-		intersection = intersectionDeuxCercle(tab[0],tab[1]);
-		
-		List<double[]> myList = new ArrayList<double[]>();
-		
-		for ( int i = 0; i < 5; i++)
-		{
-			for ( int j = i+1; j < 5; j++)
-			{
-					intersection = intersectionDeuxCercle(tab[i],tab[j]);
-					if (appartientToutCercle(intersection[0],tab))
-					{
-						myList.add(intersection[0]);
-					}
-					if (appartientToutCercle(intersection[1],tab))
-					{
-						myList.add(intersection[1]);
-					}
+				if (!drap && distanceMin == Math.sqrt(Math.pow(point.getx() - tab.get(i).getx(), 2) + Math.pow(point.gety() - tab.get(i).gety(), 2) ))
+				{
+					distanceMin = Math.sqrt(Math.pow(point.getx() - tab.get(i).getx(), 2) + Math.pow(point.gety() - tab.get(i).gety(), 2) );
+					index = i;
+					
+				}
+				else if (!drap)
+				{
+					distanceMin = Math.sqrt(Math.pow(point.getx() - tab.get(i).getx(), 2) + Math.pow(point.gety() - tab.get(i).gety(), 2) );
+					index = i;
+				}
 			}
 		}
 		
-		couple = moyennePoint(myList);
-		myList = sortPoint(couple,myList);
-		
-		//System.out.println("point moyenb : (" + couple[0] + "," + couple[1] + ")" );
-		couple = calculCentreGravite(myList);
-		for (int e = 0; e < myList.size(); e++)
-		{
-			System.out.print("(" + myList.get(e)[0] +","+ myList.get(e)[1] + ") , ");
-		}
-		System.out.println("");
-		
-		return couple;
+		return index;
 	}
 	
-	private double []calculCentreGravite(List<double[]> myList)
+	private List<Trouple > selectUnIncendie (List<Trouple > tab)
 	{
-
-		double couple[];
-		/*couple = new double[2];
-		couple[0] = -1;
-		couple[1] = 2;
-		myList.set(0, couple);
-
-		couple = new double[2];
-		couple[0] = 6;
-		couple[1] = -1;
-		myList.set(3, couple);
-		couple = new double[2];
-		couple[0] = 3;
-		couple[1] = 1;
-		myList.set(4, couple);
-		couple = new double[2];
-		couple[0] = 7;
-		couple[1] = 5;
-		myList.set(1, couple);
-		couple = new double[2];
-		couple[0] = 4;
-		couple[1] = 3;
-		myList.set(2, couple);*/
-		
-		//double couple[];
-		
-		/*couple = myList.get(2);
-		myList.set(2,myList.get(4));
-		myList.set(4,couple);*/
-		couple = new double[2];
-		
-		couple[0] = 0;
-		couple[1] = 0;
-		
-		double a = 0;
-		
-		for (int i = 0; i < myList.size(); i++)
-		{
-			System.out.print("(" + myList.get(i)[0] +","+ myList.get(i)[1] + ") , ");
-			System.out.println("");
-			if (i < myList.size() - 1)
-			{
-				a += (myList.get(i)[0]*myList.get(i+1)[1]) - (myList.get(i+1)[0]*myList.get(i)[1]);
-				couple[0] += (myList.get(i)[0]+myList.get(i+1)[0]) * (myList.get(i)[0]*myList.get(i+1)[1]-myList.get(i+1)[0]*myList.get(i)[1]);
-				couple[1] += (myList.get(i)[1]+myList.get(i+1)[1]) * (myList.get(i)[0]*myList.get(i+1)[1]-myList.get(i+1)[0]*myList.get(i)[1]);
-				
-			}
-			else
-			{
-				a += (myList.get(i)[0]*myList.get(0)[1]) - (myList.get(0)[0]*myList.get(i)[1]);
-				couple[0] += (myList.get(i)[0]+myList.get(0)[0]) * (myList.get(i)[0]*myList.get(0)[1]-myList.get(0)[0]*myList.get(i)[1]);
-				couple[1] += (myList.get(i)[1]+myList.get(0)[1]) * (myList.get(i)[0]*myList.get(0)[1]-myList.get(0)[0]*myList.get(i)[1]);
-				
-			}
-			//System.out.println("i : " + i +", a : " + a );
-		}
-		
-		a = a /2;
-		couple[0] = couple[0] / (6*a);
-		couple[1] = couple[1] / (6*a);
-		
-		//System.out.println("("+couple[0]+ "," + couple[1] + ")");
-		System.out.println(a);
-		return couple;
-	}
-	
-	private double[] moyennePoint(List<double[]> myList)
-	{
-		double couple[];
-		couple = new double[2];
-		couple[0] = 0;
-		couple[1] = 0;
-		for (int i = 0; i < myList.size(); i++)
-		{
-			couple[0] += myList.get(i)[0];
-			couple[1] += myList.get(i)[1];
-		}
-		couple[0] /= myList.size();
-		couple[1] /= myList.size();
-		return couple;
-	}
-	
-	private boolean appartientToutCercle(double point[],Trouple tab[])
-	{
-		boolean drap = true;
+		double distance = -1;
+		double distancePrec = 0;
+		List<Trouple > tabUnIncendie = new ArrayList<Trouple >();
+		tabUnIncendie.add(tab.get(0));
+		tab.remove(0);
 		int i = 0;
-		while (i < 5 && drap)
+		
+		if (tab.size() > 0)
 		{
-			double d = Math.sqrt((Math.pow(tab[i].getx()-point[0],2))+(Math.pow(tab[i].gety()-point[1],2)));
-			if (d > (rayon_max - tab[i].getIntensite()) + 0.1)
+			//distance = Math.sqrt(Math.pow(tabUnIncendie.get(0).getx() - tab.get(i).getx(), 2) + Math.pow(tabUnIncendie.get(0).gety() - tab.get(i).gety(), 2));
+			distancePrec = 0;
+			i = indexPointPlusProche (tab,tabUnIncendie.get(0));
+			
+			if (i >= 0 && i < tab.size())
 			{
-				//System.out.print(i);
-				drap = false;
+				distance = Math.sqrt(Math.pow(tabUnIncendie.get(0).getx() - tab.get(i).getx(), 2) + Math.pow(tabUnIncendie.get(0).gety() - tab.get(i).gety(), 2));
 			}
-			i++;
 		}
-		return drap;
+		
+		//System.out.println("i " + i);
+		
+		while ( i >= 0 && tab.size() > 0 && distancePrec <= distance  && tab.get(i).getIntensite() <= tabUnIncendie.get(tabUnIncendie.size()-1).getIntensite())
+		{
+			distance = Math.sqrt(Math.pow(tabUnIncendie.get(0).getx() - tab.get(i).getx(), 2) + Math.pow(tabUnIncendie.get(0).gety() - tab.get(i).gety(), 2));
+			//System.out.println("distancePrec : " + distancePrec + "; Distance : " + distance);
+			
+			if (distancePrec <= distance && distance < 10)
+			{
+				distancePrec = Math.sqrt(Math.pow(tabUnIncendie.get(0).getx() - tab.get(i).getx(), 2) + Math.pow(tabUnIncendie.get(0).gety() - tab.get(i).gety(), 2));
+				tabUnIncendie.add(tab.get(i));
+				//System.out.println("ajout");
+				tab.remove(i);
+			}
+			if (tab.size()>0)
+			{
+				i = indexPointPlusProche (tab,tabUnIncendie.get(0));
+				if (i < tab.size() && i >= 0)
+				{
+					distance = Math.sqrt(Math.pow(tabUnIncendie.get(0).getx() - tab.get(i).getx(), 2) + Math.pow(tabUnIncendie.get(0).gety() - tab.get(i).gety(), 2));
+				}
+			}
+			
+		}
+		
+		return tabUnIncendie;
 	}
 	
-	private double[][] intersectionDeuxCercle(Trouple cercle1, Trouple cercle2)
+	private List<Trouple> retirerValeurNull(List<Trouple > tab)
 	{
+		int i = tab.size()-1;
+		while (i >= 0)
+		{
+			if (tab.get(i).getIntensite() <= 0)
+			{
+				tab.remove(i);
+			}
+			i--;
+			
+		}
+		nbPoint = tab.size(); 
 		
-		double intersection[][];
-		intersection = new double[2][2];
-		
-		int r1 = rayon_max - cercle1.getIntensite();
-		int r2 = rayon_max - cercle2.getIntensite();
-		
-		double d = Math.sqrt((Math.pow(cercle2.getx()-cercle1.getx(),2))+(Math.pow(cercle2.gety()-cercle1.gety(),2)));
-		double a = (Math.pow(r1,2) - Math.pow(r2,2) + Math.pow(d,2))/(2*d);
-		double b = (Math.pow(r2,2) - Math.pow(r1,2) + Math.pow(d,2))/(2*d);
-		
-		double h = Math.sqrt(Math.pow(r1,2)-Math.pow(a, 2));
-		
-		double x = cercle1.getx() + ((a/d) * (cercle2.getx() - cercle1.getx()));
-		double y = cercle1.gety() + (a/d) * (cercle2.gety() - cercle1.gety());
-		
-		
-		intersection[0][0] = x + (h*(cercle2.gety()-cercle1.gety()))/d;
-		intersection[0][1] = y - (h*(cercle2.getx()-cercle1.getx()))/d;
-		
-		intersection[1][0] = x - (h*(cercle2.gety()-cercle1.gety()))/d;
-		intersection[1][1] = y + (h*(cercle2.getx()-cercle1.getx()))/d;
-		
-		return intersection;
+		return tab;
+
 	}
 	
-	private Trouple[] generateData()
+	private List<Trouple > generateData()
 	{
-		Trouple tab[];
-		tab = new Trouple[5];
-		tab[0] = new Trouple(7,5,4);
-		tab[1] = new Trouple(5,4,4);
-		tab[2] = new Trouple(6,3,5);
-		tab[3] = new Trouple(8,3,4);
-		tab[4] = new Trouple(4,2,3);
+		List<Trouple > tab = new ArrayList<Trouple >();
+		
+		tab.add(new Trouple(24,4,8));
+		tab.add(new Trouple(22,6,6));
+		tab.add(new Trouple(26,6,6));
+		
+		tab.add(new Trouple(2,3,0));
+		tab.add(new Trouple(1,3,0));
+		
+		tab.add(new Trouple(1,2,8));
+		tab.add(new Trouple(2,3,7));
+		tab.add(new Trouple(3,3,6));
+		
+		tab.add(new Trouple(50,3,0));
+		tab.add(new Trouple(52,3,0));
+		
+		tab.add(new Trouple(28,8,8));
+		tab.add(new Trouple(30,10,6));
+		tab.add(new Trouple(30,6,6));
+		
+		
+		tab.add(new Trouple(-20,-20,1));
+		
+		tab.add(new Trouple(1,30,1));
+		tab.add(new Trouple(2,26,2));
+		nbPoint = tab.size();
 		return tab;
 	}
+	
+	
 
 }

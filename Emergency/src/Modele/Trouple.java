@@ -4,6 +4,7 @@ public class Trouple {
 	private double x;
 	private double y;
 	private int intensite;
+	private int rayon_max = 9;
 	
 	public Trouple(double x, double y, int intensite)
 	{
@@ -25,6 +26,11 @@ public class Trouple {
 	public int getIntensite()
 	{
 		return this.intensite;
+	}
+	
+	public double getRayon()
+	{
+		return rayon_max - this.intensite;
 	}
 	
 	public String toString() {
