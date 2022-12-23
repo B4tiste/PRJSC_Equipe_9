@@ -1,10 +1,9 @@
 package ModelDto;
 
 
-import InterfacesDefinition.IBaseModel;
 import InterfacesDefinition.IBaseModelDto;
+import Models.TypeUrgence;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Date;
@@ -29,13 +28,41 @@ public class UrgenceDto implements IBaseModelDto {
 
     @NotNull
     @JsonProperty("incidentDto")
-    private IncidentDto incidentDto;
+    private Long incident;
 
     @NotNull
     @JsonProperty("typeDto")
-    private TypeDto typeDto;
+    private Long type;
 
     @NotNull
     @JsonProperty("statutDto")
-    private StatutDto statutDto;
+    private Long statut;
+
+    public Long getId() {
+        return id;
+    }
+
+    public Date getDateCreation() {
+        return dateCreation;
+    }
+
+    public Date getDateUpdate() {
+        return dateUpdate;
+    }
+
+    public String getTitre() {
+        return titre;
+    }
+
+    public Long getIncidentDto() {
+        return incident;
+    }
+
+    public Long getTypeRessourceDto() {
+        return type;
+    }
+
+    public Long getStatutDto() {
+        return statut;
+    }
 }

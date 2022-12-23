@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 public class BaseController {
 
-    @Autowired
+
     private IBaseService service;
 
     private ObjectMapper converter = new ObjectMapper();
@@ -87,8 +87,15 @@ public class BaseController {
             {
                 IBaseModelDto modelDto;
                 try {
-                    modelDto = this.getBaseMapper().GetModelMapper().map(model, model.getClass());
-                    return (new ResponseEntity<IBaseModelDto>(modelDto, HttpStatus.OK));
+                    modelDto = this.getBaseMapper().GetModelMapper().map(model, IBaseModelDto.class);
+                    if(modelDto == null)
+                    {
+                        return (new ResponseEntity<IBaseModelDto>(HttpStatus.NOT_FOUND));
+                    }
+                    else
+                    {
+                        return (new ResponseEntity<IBaseModelDto>(modelDto, HttpStatus.OK));
+                    }
                 }
                 catch (Exception e){
                     e.printStackTrace();

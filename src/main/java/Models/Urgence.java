@@ -29,7 +29,7 @@ public class Urgence implements IBaseModel  {
 
     @ManyToOne
     @JoinColumn(name = "ID_TYPE")
-    private Type type;
+    private TypeUrgence type;
 
     @ManyToOne
     @JoinColumn(name = "ID_STATUT")
@@ -38,7 +38,7 @@ public class Urgence implements IBaseModel  {
     public Urgence() {
     }
 
-    public Urgence(Date dateCreation, Date dateUpdate, String titre, Incident incident, Type type, Statut statut) {
+    public Urgence(Date dateCreation, Date dateUpdate, String titre, Incident incident, TypeUrgence type, Statut statut) {
         this.dateCreation = dateCreation;
         this.dateUpdate = dateUpdate;
         this.titre = titre;
@@ -87,11 +87,11 @@ public class Urgence implements IBaseModel  {
         this.incident = incident;
     }
 
-    public Type getType() {
+    public TypeUrgence getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(TypeUrgence type) {
         this.type = type;
     }
 

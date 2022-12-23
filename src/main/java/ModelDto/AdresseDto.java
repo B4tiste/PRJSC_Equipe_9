@@ -26,9 +26,33 @@ public class AdresseDto implements IBaseModelDto {
 
     @NotNull
     @JsonProperty("codePostalAdresse")
-    private int codePostalAdresse;
+    private String codePostalAdresse;
 
     @NotNull
     @JsonProperty("paysAdresse")
     private String paysAdresse;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getRueAdresse() {
+        return rueAdresse;
+    }
+
+    public String getVilleAdresse() {
+        return villeAdresse;
+    }
+
+    public String getEtatAdresse() {
+        return etatAdresse;
+    }
+
+    public String getCodePostalAdresse() {
+        return codePostalAdresse;
+    }
+
+    public String getPaysAdresse() {
+        return paysAdresse;
+    }
 }

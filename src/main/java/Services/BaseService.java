@@ -32,6 +32,17 @@ public class BaseService implements IBaseService {
         }
     }
 
+
+    public Boolean isExist(IBaseModel model) {
+        try{
+            var id = model.getId();
+            return this.getById(id) != null ? Boolean.TRUE : Boolean.FALSE;
+        }catch(Exception e){
+            return Boolean.FALSE;
+        }
+
+    }
+
     @Override
     public IBaseModel Update(IBaseModel model) {
         try{
@@ -76,6 +87,34 @@ public class BaseService implements IBaseService {
         try{
             var result = baseRepository.save(model);
             return (IBaseModel)result;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public IBaseModel CreateOrGet(IBaseModel model) {
+        try{
+            var isExisting = baseRepository.existsById(model.getId());
+            if(isExisting==Boolean.TRUE)
+            {
+                var elem =  baseRepository.findById(model.getId());
+                if(elem.isPresent())
+                {
+                    return (IBaseModel) elem.get();
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                var result = baseRepository.save(model);
+                return (IBaseModel)result;
+            }
         }
         catch (Exception e)
         {

@@ -21,5 +21,21 @@ public class CapteurDonneesDto  implements IBaseModelDto {
 
     @NotNull
     @JsonProperty("capteur")
-    private Capteur capteur;
+    private Long capteur;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public String getValeur() {
+        return valeur;
+    }
+
+    public Long getCapteur() {
+        return capteur;
+    }
 }

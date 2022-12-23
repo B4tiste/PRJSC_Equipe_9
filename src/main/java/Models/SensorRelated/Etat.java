@@ -1,6 +1,6 @@
 package Models.SensorRelated;
 
-import Models.SensorRelated.Microcontroller;
+
 import jakarta.persistence.*;
 import InterfacesDefinition.*;
 

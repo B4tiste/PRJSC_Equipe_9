@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import InterfacesDefinition.*;
 
 @Entity
-@Table(name = "TYPE")
-public class Type implements IBaseModel  {
+@Table(name = "TYPE_RESSOURCE")
+public class TypeRessource implements IBaseModel  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,10 +18,10 @@ public class Type implements IBaseModel  {
     @Column(name = "VALEUR")
     private int valeur;
 
-    public Type() {
+    public TypeRessource() {
     }
 
-    public Type(String nom, int valeur) {
+    public TypeRessource(String nom, int valeur) {
         this.nom = nom;
         this.valeur = valeur;
     }
@@ -52,7 +52,7 @@ public class Type implements IBaseModel  {
 
     @Override
     public String toString() {
-        return "Type{" +
+        return "TypeRessource{" +
                 "id=" + id +
                 ", nom='" + nom + '\'' +
                 ", valeur=" + valeur +

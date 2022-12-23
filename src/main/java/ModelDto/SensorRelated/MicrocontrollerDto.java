@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public class MicrocontrollerDto implements IBaseModelDto {
+
     @NotNull
     @JsonProperty("id")
     private Long id;
@@ -27,9 +28,33 @@ public class MicrocontrollerDto implements IBaseModelDto {
 
     @NotNull
     @JsonProperty("etat")
-    private Etat etat;
+    private Long etat;
 
     @NotNull
     @JsonProperty("capteurs")
-    private List<Capteur> capteurs;
+    private List<Long> capteurs;
+
+    public Long getId() {
+        return id;
+    }
+
+    public Float getLatitude() {
+        return latitude;
+    }
+
+    public Float getLongitude() {
+        return longitude;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public Long getEtat() {
+        return etat;
+    }
+
+    public List<Long> getCapteurs() {
+        return capteurs;
+    }
 }

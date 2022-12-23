@@ -19,4 +19,15 @@ public class StatutDto  implements IBaseModelDto {
     @JsonProperty("valeur")
     private int valeur;
 
+    public Long getId() {
+        return id;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public int getValeur() {
+        return valeur;
+    }
 }

@@ -1,6 +1,6 @@
 package Models.SensorRelated;
 
-import Models.SensorRelated.Microcontroller;
+
 import jakarta.persistence.*;
 import InterfacesDefinition.*;
 
@@ -18,15 +18,13 @@ public class CapteurType implements IBaseModel {
     @Column(name = "TYPE")
     private String type;
 
-    @OneToMany(mappedBy = "capteurType")
-    private List<Capteur> capteurs;
+
 
     public CapteurType() {
     }
 
-    public CapteurType(String type, List<Capteur> capteurs) {
+    public CapteurType(String type) {
         this.type = type;
-        this.capteurs = capteurs;
     }
 
     public Long getId() {
@@ -45,11 +43,5 @@ public class CapteurType implements IBaseModel {
         this.type = type;
     }
 
-    public List<Capteur> getCapteurs() {
-        return capteurs;
-    }
 
-    public void setCapteurs(List<Capteur> capteurs) {
-        this.capteurs = capteurs;
-    }
 }

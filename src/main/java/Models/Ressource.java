@@ -18,7 +18,7 @@ public class Ressource implements IBaseModel  {
 
     @ManyToOne
     @JoinColumn(name = "ID_TYPE")
-    private Type type;
+    private TypeRessource type;
 
     @ManyToOne
     @JoinColumn(name = "ID_STATUT")
@@ -31,7 +31,7 @@ public class Ressource implements IBaseModel  {
     public Ressource() {
     }
 
-    public Ressource(String nom, Type type, Statut statut, Urgence urgence) {
+    public Ressource(String nom, TypeRessource type, Statut statut, Urgence urgence) {
         this.nom = nom;
         this.type = type;
         this.statut = statut;
@@ -54,11 +54,11 @@ public class Ressource implements IBaseModel  {
         this.nom = nom;
     }
 
-    public Type getType() {
+    public TypeRessource getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(TypeRessource type) {
         this.type = type;
     }
 
@@ -80,7 +80,7 @@ public class Ressource implements IBaseModel  {
 
     @Override
     public String toString() {
-        return "Ressource{" +
+        return "TypeRessource{" +
                 "id=" + id +
                 ", nom='" + nom + '\'' +
                 ", type=" + type +

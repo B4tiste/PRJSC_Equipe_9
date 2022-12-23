@@ -20,4 +20,15 @@ public class VehiculeDto implements IBaseModelDto {
     @JsonProperty("longitude")
     private Long longitude;
 
+    public Long getCapacite() {
+        return capacite;
+    }
+
+    public Long getLatitude() {
+        return latitude;
+    }
+
+    public Long getLongitude() {
+        return longitude;
+    }
 }

@@ -36,9 +36,37 @@ public class CapteurDto implements IBaseModelDto {
 
     @NotNull
     @JsonProperty("sensorType")
-    private CapteurTypeDto sensorType;
+    private Long sensorType;
+
+    public Long getId() {
+        return id;
+    }
+
+    public Float getLatitude() {
+        return latitude;
+    }
+
+    public Float getLongitude() {
+        return longitude;
+    }
+
+    public Microcontroller getMicrocontroller() {
+        return microcontroller;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public Long getSensorType() {
+        return sensorType;
+    }
+
+    public List<Long> getCapteurDonnees() {
+        return capteurDonnees;
+    }
 
     @NotNull
     @JsonProperty("capteurDonnees")
-    private List<CapteurDonnees> capteurDonnees;
+    private List<Long> capteurDonnees;
 }

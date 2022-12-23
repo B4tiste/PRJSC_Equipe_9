@@ -1,7 +1,7 @@
 package Models.SensorRelated;
 
 import InterfacesDefinition.*;
-import Models.SensorRelated.Microcontroller;
+
 import jakarta.persistence.*;
 
 import java.util.List;

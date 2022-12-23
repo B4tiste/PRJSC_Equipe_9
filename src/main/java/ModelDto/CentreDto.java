@@ -10,6 +10,8 @@ import java.util.List;
 
 
 public class CentreDto implements IBaseModelDto {
+
+
     @NotNull
     @JsonProperty("id")
     private Long id;
@@ -32,6 +34,30 @@ public class CentreDto implements IBaseModelDto {
 
     @NotNull
     @JsonProperty("ressourceComposanteDtos")
-    private List<RessourceComposanteDto> ressourceComposanteDtos;
+    private List<Long> ressourceComposanteDtos;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public Boolean getAvailable() {
+        return isAvailable;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public List<Long> getRessourceComposanteDtos() {
+        return ressourceComposanteDtos;
+    }
 
 }

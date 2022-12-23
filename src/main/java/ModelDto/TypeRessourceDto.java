@@ -1,12 +1,10 @@
 package ModelDto;
 
-import InterfacesDefinition.IBaseModel;
 import InterfacesDefinition.IBaseModelDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
 import org.jetbrains.annotations.NotNull;
 
-public class TypeDto  implements IBaseModelDto {
+public class TypeRessourceDto implements IBaseModelDto {
 
     @NotNull
     @JsonProperty("id")
@@ -17,4 +15,16 @@ public class TypeDto  implements IBaseModelDto {
     @NotNull
     @JsonProperty("valeur")
     private int valeur;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public int getValeur() {
+        return valeur;
+    }
 }

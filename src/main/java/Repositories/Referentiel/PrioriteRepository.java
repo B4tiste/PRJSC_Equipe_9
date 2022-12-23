@@ -1,7 +1,7 @@
-package Repositories;
+package Repositories.Referentiel;
 
-import Models.Incident;
-import Models.Urgence;
+
+import Models.*;
 import org.springframework.stereotype.Repository;
 
 
@@ -12,9 +12,8 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 @Repository
-public interface UrgenceRepository extends PagingAndSortingRepository<Urgence, Long>, CrudRepository<Urgence,Long> {
+public interface PrioriteRepository extends PagingAndSortingRepository<Priorite, Long>, CrudRepository<Priorite,Long> {
 
-    List<Urgence> findByNom(@Param("NOM") String nom);
+    List<Priorite> findByName(@Param("NOM") String name);
+
 }
-
-

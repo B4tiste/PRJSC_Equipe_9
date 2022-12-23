@@ -41,10 +41,45 @@ public class IncidentDto  implements IBaseModelDto {
 
     @NotNull
     @JsonProperty("adresseDto")
-    private AdresseDto adresseDto;
+    private Long adresseDto;
 
     @NotNull
     @JsonProperty("prioriteDto")
-    private PrioriteDto prioriteDto;
+    private Long prioriteDto;
 
+    public Long getId() {
+        return id;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public Date getDateCreation() {
+        return dateCreation;
+    }
+
+    public Date getDateUpdate() {
+        return dateUpdate;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public String getDescriptionIncident() {
+        return descriptionIncident;
+    }
+
+    public Long getAdresseDto() {
+        return adresseDto;
+    }
+
+    public Long getPrioriteDto() {
+        return prioriteDto;
+    }
 }

@@ -17,4 +17,16 @@ public class RoleDto implements IBaseModelDto {
     @NotNull
     @JsonProperty("valeur")
     private Long valeur;
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public Long getValeur() {
+        return valeur;
+    }
 }
