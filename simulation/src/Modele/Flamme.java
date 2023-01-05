@@ -1,5 +1,5 @@
 package Modele;
-
+/*test*/ 
 public class Flamme {
 	
 	private double x;
