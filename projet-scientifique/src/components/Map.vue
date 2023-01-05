@@ -1,7 +1,5 @@
 <template>
-  <div class="container">
-    <div id="map"></div>
-  </div>
+  <div id="map" />
 </template>
 
 <script>
@@ -15,15 +13,12 @@ export default {
       /** @type L.map */
       map: null,
       zoom: 14,
-      minZoom: 10,
-      maxZoom: 20,
+      minZoom: 12,
+      maxZoom: 18,
       /** @type array */
-      centre: [45.76998015720915, 4.884919481157877],
-      scrollWheelZoom: true,
-      loading: true,
-      options: null,
+      centre: [45.7766461124361, 4.884143173956448],
       capteurs: [],
-      bounds: [
+      limitesCarte: [
         // en bas à gauche
         [45.71041155658168, 4.731144701943372],
         // en haut à droite
@@ -34,7 +29,7 @@ export default {
         blueIcon: L.icon({
           iconUrl:
             "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
-          iconSize: [8, 14],
+          iconSize: [20, 36],
           iconAnchor: [0, 0],
           popupAnchor: [0, 0],
         }),
@@ -51,25 +46,32 @@ export default {
           iconAnchor: [0, 0],
           popupAnchor: [0, 0],
         }),
-        sensorActivated: L.icon({
+        sensorActivate: L.icon({
           iconUrl: "./images/sensor-activated.png",
           iconSize: [15, 15],
           iconAnchor: [0, 0],
           popupAnchor: [0, 0],
-        }),
+        })
       },
-      corners: [
-        45.75544092417402, 4.858933317147795, 45.790549102141334,
-        4.908539830118779,
+      coinsGrille: [
+        45.763823823027685, 4.8618173788693015,
+        45.79019363295949, 4.907187868645735
       ],
       capteurFeatureCollection: [],
       grid: {},
       capteurActives: [],
-      capteursMarkers: []
+      capteursMarqueurs: [],
+      sontTousActives: false,
+      nbCapteursMinimum: 3
     };
   },
+  props: {
+    marqueursFeu: {
+      type: Array,
+    },
+  },
   beforeMount() {
-    this.grid = turf.pointGrid(this.corners, 500, {
+    this.grid = turf.pointGrid(this.coinsGrille, 500, {
       units: "meters",
     });
   },
@@ -78,7 +80,18 @@ export default {
     this.initCapteurs();
 
     this.capteurFeatureCollection = turf.featureCollection(this.capteurs);
-    this.findNearestPoint(this.capteurFeatureCollection);
+
+    //this.findNearestPointOnClick(this.capteurFeatureCollection);
+    this.$emit("update:coinsGrille", this.coinsGrille);
+  },
+  watch: {
+    marqueursFeu() {
+      console.log(this.marqueursFeu)
+      this.marqueursFeu.forEach((marqueur) => {
+        this.findNearestPoint([marqueur.getLatLng().lat, marqueur.getLatLng().lng])
+        marqueur.addTo(this.map)
+      })
+    }
   },
   methods: {
     /**
@@ -96,9 +109,13 @@ export default {
         minZoom: this.minZoom,
         maxZoom: this.maxZoom,
         maxBounds: L.latLngBounds(
-          L.latLng(this.bounds[0]),
-          L.latLng(this.bounds[1])
+          L.latLng(this.limitesCarte[0]),
+          L.latLng(this.limitesCarte[1])
         ),
+        zoomAnimation:false,
+        fadeAnimation:true,
+        markerZoomAnimation:false,
+        doubleClickZoom: false
       }).setView(this.centre, this.zoom);
 
       const lightLayer = L.tileLayer(
@@ -139,7 +156,7 @@ export default {
           icon: this.icons.sensor,
         });
 
-        this.capteursMarkers.push(marker);
+        this.capteursMarqueurs.push(marker);
         marker.addTo(this.map);
       });
       this.capteurs = capteurs;
@@ -147,33 +164,80 @@ export default {
     /**
      * Trouve le point le plus proche du click
      */
-    findNearestPoint() {
+    findNearestPoint(point) {
+        const turfPoint = turf.point([point[0], point[1]]);
+
+        var tempCapteurFeatureCollection = this.capteurFeatureCollection;
+        var tempcapteursMarqueurs = this.capteursMarqueurs;
+
+        for (var i = 0; i < this.nbCapteursMinimum; i++) {
+          if (tempCapteurFeatureCollection.features.length !== 0) {
+            const nearest = turf.nearestPoint(
+              turfPoint,
+              tempCapteurFeatureCollection
+            );
+
+            if (!this.verifieCapteurDejaActif(nearest)) {
+              this.capteurActives.push(nearest.geometry);
+
+              const index = this.findIndexOfMarker(
+                nearest,
+                tempCapteurFeatureCollection
+              );
+
+              if (index !== -1) {
+                const marker = tempcapteursMarqueurs[index];
+
+                tempCapteurFeatureCollection.features.splice(index, 1);
+                tempcapteursMarqueurs.splice(index, 1);
+
+                this.map.removeLayer(marker);
+
+                L.marker(nearest.geometry.coordinates, {
+                  icon: this.icons.sensorActivate,
+                }).addTo(this.map);
+              }
+            }
+          }
+        }
+    },
+    findNearestPointOnClick() {
       this.map.on("click", (e) => {
         const coord = e.latlng;
         const turfPoint = turf.point([coord.lat, coord.lng]);
 
-        const nearest = turf.nearestPoint(
-          turfPoint,
-          this.capteurFeatureCollection
-        );
+        var tempCapteurFeatureCollection = this.capteurFeatureCollection;
+        var tempcapteursMarqueurs = this.capteursMarqueurs;
 
-        if (!this.verifieCapteurDejaActif(nearest)
-        ) {
-          this.capteurActives.push(nearest.geometry);
+        for (var i = 0; i < this.nbCapteursMinimum; i++) {
+          if (tempCapteurFeatureCollection.features.length !== 0) {
+            const nearest = turf.nearestPoint(
+              turfPoint,
+              tempCapteurFeatureCollection
+            );
 
-          const index = this.findIndexOfMarker(nearest);
+            if (!this.verifieCapteurDejaActif(nearest)) {
+              this.capteurActives.push(nearest.geometry);
 
-          if (index !== -1) {
-            const marker = this.capteursMarkers[index];
+              const index = this.findIndexOfMarker(
+                nearest,
+                tempCapteurFeatureCollection
+              );
 
-            this.map.removeLayer(marker);
+              if (index !== -1) {
+                const marker = tempcapteursMarqueurs[index];
 
-            L.marker(nearest.geometry.coordinates, {
-              icon: this.icons.sensorActivated,
-            }).addTo(this.map);
+                tempCapteurFeatureCollection.features.splice(index, 1);
+                tempcapteursMarqueurs.splice(index, 1);
+
+                this.map.removeLayer(marker);
+
+                L.marker(nearest.geometry.coordinates, {
+                  icon: this.icons.sensorActivate,
+                }).addTo(this.map);
+              }
+            }
           }
-
-
         }
       });
     },
@@ -182,10 +246,9 @@ export default {
      * @param {turf.point} nearest
      * @param {turf.featureCollection} capteurFeatureCollection
      */
-    findIndexOfMarker(nearest) {
-      for (var i = 0; i < this.capteurFeatureCollection.features.length; i++) {
-        const capteur =
-          this.capteurFeatureCollection.features[i].geometry.coordinates;
+    findIndexOfMarker(nearest, tableau) {
+      for (var i = 0; i < tableau.features.length; i++) {
+        const capteur = tableau.features[i].geometry.coordinates;
         if (
           capteur[0] === nearest.geometry.coordinates[0] &&
           capteur[1] === nearest.geometry.coordinates[1]
@@ -197,7 +260,7 @@ export default {
     },
     /**
      * Vérifie si un capteur est déjà actif pour éviter de recréer le marker
-     * @param {turf.point} nearest 
+     * @param {turf.point} nearest
      */
     verifieCapteurDejaActif(nearest) {
       if (this.capteurActives.length != 0) {
@@ -223,16 +286,12 @@ export default {
 </script>
 
 <style scoped>
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100vw;
-}
-
 #map {
   width: 100%;
   height: 100%;
+}
+
+.leaflet-marker-icon {
+  transform-origin: center center!important;
 }
 </style>
