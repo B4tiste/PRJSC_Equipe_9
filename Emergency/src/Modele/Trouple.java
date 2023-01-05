@@ -1,11 +1,17 @@
 package Modele;
 
+
 public class Trouple {
 	private double x;
 	private double y;
 	private int intensite;
 	private int rayon_max = 9;
 	
+	/**
+	 * @param x
+	 * @param y
+	 * @param intensite
+	 */
 	public Trouple(double x, double y, int intensite)
 	{
 		this.x = x;
@@ -13,26 +19,43 @@ public class Trouple {
 		this.intensite = intensite;
 	}
 	
+	/**
+	 * @return le x du trouple coordonée, intensité
+	 */
 	public double getx()
 	{
 		return this.x;
 	}
 	
+	/**
+	 * @return le y du trouple coordonée, intensité
+	 */
 	public double gety()
 	{
 		return this.y;
 	}
 	
+	/**
+	 * @return l'intensité du trouple coordonée, intensité
+	 */
 	public int getIntensite()
 	{
 		return this.intensite;
 	}
 	
+	
+	
+	/**
+	 * @return renvoie le rayon du cercle pour l'intensité donnée
+	 */
 	public double getRayon()
 	{
 		return rayon_max - this.intensite;
 	}
 	
+	/**
+	 * @brief permet d'afficher l'objet
+	 */
 	public String toString() {
 		   return "(" + this.x+
 			  "," + this.y +

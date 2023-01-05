@@ -16,23 +16,59 @@ public class ApproximerIncendie {
 		
 	}
 	
+	/**
+	 * @param tab la liste des capteurs qui représente un incendie
+	 * @param size le nombre de capteur
+	 * @return les coordonée d'un probable incendie
+	 */
 	public double[] launchCalclul(List<Trouple > tab, int size)
 	{
 		this.nbPoint = size;
 		double couple[];
 		couple = new double[2];
 		
-		System.out.println("Je lance le calcul");
+		/*System.out.println("Je lance le calcul");
 		
 		for (int i = 0; i < nbPoint ; i++)
 		{
 			System.out.println(tab.get(i));
-		}
+		}*/
 		
 		couple = intersection(tab);
 		
 		return couple;
 		
+	}
+	
+	/**
+	 * @param tab 
+	 * @return
+	 */
+	public double[] launchCalculIncendieZone(List<Trouple > tab)
+	{
+		double couple[];
+		couple = new double[2];
+		CalculGeneral calc = new CalculGeneral();
+		
+		couple[0] = tab.get(0).getx();
+		couple[1] = tab.get(0).gety();
+		
+		List<double[] > newTabCouple = new ArrayList<double[]>();
+		List<double[] > newTabSort;
+		
+		for ( int i = 0; i < tab.size(); i++)
+		{
+			couple = new double[2];
+			couple[0] = tab.get(i).getx();
+			couple[1] = tab.get(i).gety();
+			newTabCouple.add(couple);
+		}
+		
+		
+		newTabSort = sortPoint(couple,newTabCouple);
+		couple = calc.calculCentreGravite(newTabSort);
+		
+		return couple;
 	}
 	
 	/**
@@ -127,13 +163,16 @@ public class ApproximerIncendie {
 			for ( int j = i+1; j < nbPoint ; j++)
 			{
 					intersection = calc.intersectionDeuxCercle(tab.get(i),tab.get(j));
+					
 					if (appartientToutCercle(intersection[0],tab))
 					{
 						myList.add(intersection[0]);
+						
 					}
 					if (appartientToutCercle(intersection[1],tab))
 					{
 						myList.add(intersection[1]);
+						
 					}
 			}
 		}
@@ -166,16 +205,4 @@ public class ApproximerIncendie {
 		return drap;
 	}
 	
-
-	
-	private Trouple[] generateData()
-	{
-		Trouple tab[];
-		nbPoint = 3;
-		tab = new Trouple[nbPoint];
-		tab[0] = new Trouple(10,2,8);
-		tab[1] = new Trouple(8,3,7);
-		tab[2] = new Trouple(10,3,7);
-		return tab;
-	}
 }
