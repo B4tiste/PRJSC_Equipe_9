@@ -1,0 +1,14 @@
+[
+    {
+        "id": "1",
+        "latitude": 45.78045523691529,
+        "longitude": 4.879839701019915,
+        "nom": "Caserne Salengro"
+    },
+    {
+        "id": "2",
+        "latitude": 45.7753334606826, 
+        "longitude": 4.868260094758693,
+        "nom": "Caserne Charpennes"
+    }
+]
