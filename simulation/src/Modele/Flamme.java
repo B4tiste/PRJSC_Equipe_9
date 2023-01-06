@@ -1,7 +1,8 @@
 package Modele;
-/*test*/ 
+
 public class Flamme {
 	
+	private int idFeuAppartient;
 	private double x;
 	private double y;
 	private int intensite;
@@ -15,8 +16,9 @@ public class Flamme {
 	 * @param y
 	 * @param intensite
 	 */
-	public Flamme (double x, double y, int intensite, double distanceDetectable)
+	public Flamme (int idFeuAppartient,double x, double y, int intensite, double distanceDetectable)
 	{
+		this.idFeuAppartient = idFeuAppartient;
 		this.x = x;
 		this.y = y;
 		this.intensite = intensite;
@@ -83,5 +85,10 @@ public class Flamme {
 			  "," + this.distanceDetectable
 			  +")";
 		}
+	
+	public int getIdFeuAppartient()
+	{
+		return idFeuAppartient;
+	}
 
 }

@@ -1,8 +1,9 @@
 package Modele;
-/*test*/ 
+
 public class Trouple {
 	private double x;
 	private double y;
+	private int idSensor;
 	private int intensite;
 	private double distanceUnitaire = 1;
 	private double rayon_max = 9 * distanceUnitaire;
@@ -12,11 +13,12 @@ public class Trouple {
 	 * @param y
 	 * @param intensite
 	 */
-	public Trouple(double x, double y, int intensite)
+	public Trouple(int idSensor, double x, double y, int intensite)
 	{
 		this.x = x;
 		this.y = y;
 		this.intensite = intensite;
+		this.idSensor = idSensor;
 	}
 	
 	/**
@@ -56,11 +58,18 @@ public class Trouple {
 		this.intensite = intensite;
 	}
 	
+	public int getIdSensor()
+	{
+		return this.idSensor;
+	}
+	
 	/**
 	 * @brief permet d'afficher l'objet
 	 */
 	public String toString() {
-		   return "(" + this.x+
+		   return "(" + 
+		      "," + this.idSensor +
+		      "," + this.x +
 			  "," + this.y +
 			  "," + this.intensite
 			  +")";

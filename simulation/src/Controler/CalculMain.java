@@ -24,7 +24,7 @@ public class CalculMain {
 		
 		//calValSensor (tab,fires);
 		
-		ArrayBlockingQueue<List<List<Flamme>>>  queue = new ArrayBlockingQueue<>(1);
+		ArrayBlockingQueue<List<Feu>>  queue = new ArrayBlockingQueue<>(1);
 		
 		ThreadGenerateFire threadGenerate = new ThreadGenerateFire(queue,enFonction);
 		threadGenerate.start();

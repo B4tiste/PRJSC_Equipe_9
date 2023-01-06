@@ -3,15 +3,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-/*test*/ 
+
 import Modele.Flamme;
+import Modele.Feu;
+import Service.AccesDataSimulation;
 
 
 public class ThreadGenerateFire extends Thread {
 	
-	private ArrayBlockingQueue<List<List<Flamme>>>  queue;
+	private ArrayBlockingQueue<List<Feu>>  queue;
 	
-	private List<List<Flamme>> fires;
+	private List<Feu> fires;
 	
 	private double xMin = 0;
 	private double xMax = 9;
@@ -19,19 +21,23 @@ public class ThreadGenerateFire extends Thread {
 	private double yMin = 1;
 	private double yMax = 6;
 	
-	private double distanceUnitaire = 1;
+	private double distanceUnitaire = 0.1;
 	
 	private int intensiteMax = 9;
 	private double distanceMax = 9 * distanceUnitaire;
+	
+	AccesDataSimulation db_s;
 	
 	
 	
 	private AtomicBoolean enFonction;
 	
-    public ThreadGenerateFire (ArrayBlockingQueue<List<List<Flamme>>>  cld,AtomicBoolean enFonction) {
+    public ThreadGenerateFire (ArrayBlockingQueue<List<Feu>>  cld,AtomicBoolean enFonction) {
         this.queue = cld;
         this.enFonction = enFonction;
-        fires = new ArrayList <List<Flamme>>(); 
+        db_s = new AccesDataSimulation();
+        //fires = new ArrayList <List<Flamme>>(); 
+        fires = db_s.getValuesFires();
         
     }
     
@@ -45,6 +51,8 @@ public class ThreadGenerateFire extends Thread {
 	   			// TODO Auto-generated catch block
 	   			e.printStackTrace();
 	   		}
+    	   
+    	   
     	   //System.out.println("Ok");
     	   queue.clear();
     	  
@@ -64,6 +72,8 @@ public class ThreadGenerateFire extends Thread {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+    	    
+    	    db_s.saveDataFires(fires);
        }
        enFonction.set(false);
     }
@@ -76,31 +86,31 @@ public class ThreadGenerateFire extends Thread {
     {
     	for ( int i = 0 ; i < fires.size(); i++ )
     	{
-    		for (int j = 0; j < fires.get(i).size();j++)
+    		for (int j = 0; j < fires.get(i).sizeFeu();j++)
     		{
     			int val = (int)(Math.random()*(2-0));
     			if (val == 1)
     			{
     				
-    				if (fires.get(i).get(j).getIntensite() <= 9)
+    				if (fires.get(i).getFlamme(j).getIntensite() <= 9)
     				{
-    					fires.get(i).get(j).setIntensite(fires.get(i).get(j).getIntensite());
+    					fires.get(i).getFlamme(j).setIntensite(fires.get(i).getFlamme(j).getIntensite());
     				}
     				else
     				{
     					
-    					fires.get(i).add(new Flamme(fires.get(i).get(j).getx()+1,fires.get(i).get(j).getx(),9,fires.get(i).get(j).getDistanceDetectable()));
+    					fires.get(i).addFlamme(new Flamme(0,fires.get(i).getFlamme(j).getx()+1,fires.get(i).getFlamme(j).getx(),9,fires.get(i).getFlamme(j).getDistanceDetectable()));
     				}
     			}
     			else
     			{
-    				if (fires.get(i).get(j).getDistanceDetectable() + distanceUnitaire <= 9)
+    				if (fires.get(i).getFlamme(j).getDistanceDetectable() + distanceUnitaire <= 9)
     				{
-    					fires.get(i).get(j).setDistanceDetectable(fires.get(i).get(j).getDistanceDetectable()  + distanceUnitaire);
+    					fires.get(i).getFlamme(j).setDistanceDetectable(fires.get(i).getFlamme(j).getDistanceDetectable()  + distanceUnitaire);
     				}
     				else
     				{
-    					fires.get(i).add(new Flamme(fires.get(i).get(j).getx()+1,fires.get(i).get(j).getx(),9,fires.get(i).get(j).getDistanceDetectable()));
+    					fires.get(i).addFlamme(new Flamme(0,fires.get(i).getFlamme(j).getx()+1,fires.get(i).getFlamme(j).getx(),9,fires.get(i).getFlamme(j).getDistanceDetectable()));
     				}
     			}
     			
@@ -116,19 +126,16 @@ public class ThreadGenerateFire extends Thread {
     
 	private void addFire()
 	{
-		
-		List<Flamme> fire = new ArrayList <Flamme>();
-		
-		
 		double x = Math.random()*( xMax - xMin );
 		double y = Math.random()*( yMax - yMin );
 		
 		int intensite = (int)(Math.random()*(intensiteMax-1));
 		double distance = Math.random()*(distanceMax-intensite*distanceUnitaire );
 		
-		fire.add(new Flamme(x,y,intensite,distance));	
+		List<Flamme> flammes = new ArrayList<Flamme>();
+		flammes.add(new Flamme(-1,5,5,intensite,distance));
+		Feu fire = new Feu(flammes,-1);
 		fires.add(fire);
-
 	}
 
 }
