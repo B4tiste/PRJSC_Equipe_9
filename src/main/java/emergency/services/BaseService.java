@@ -2,14 +2,17 @@ package emergency.services;
 
 import emergency.interfacesDefinition.IBaseModel;
 import emergency.interfacesDefinition.IBaseService;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
-import emergency.repositories.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
 public class BaseService implements IBaseService {
 
-    public BaseRepository baseRepository;
+    public CrudRepository baseRepository;
 
     @Override
     public IBaseModel getById(Long id) {
@@ -29,6 +32,109 @@ public class BaseService implements IBaseService {
         else
         {
             return null;
+        }
+    }
+
+    @Override
+    public Boolean DeleteAll() {
+
+        try {
+            baseRepository.deleteAll();
+            return Boolean.TRUE;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return Boolean.FALSE;
+        }
+
+    }
+
+    @Override
+    public Boolean DeleteThem(Iterable<Long> ids) {
+        if(ids != null)
+        {
+            try {
+                baseRepository.deleteAllById(ids);
+                return Boolean.TRUE;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return Boolean.FALSE;
+            }
+        }
+        return Boolean.FALSE;
+    }
+
+
+    @Override
+    public List<IBaseModel> GetThem(Iterable<Long> ids) {
+        if(ids != null)
+        {
+            try {
+                var data = baseRepository.findAllById(ids);
+                List<IBaseModel> list = new ArrayList<IBaseModel>();
+                for (var s : data) {
+                    list.add((IBaseModel)s);
+                }
+                return list;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return new ArrayList<IBaseModel>();
+            }
+        }
+        return new ArrayList<IBaseModel>();
+
+    }
+
+    @Override
+    public List<IBaseModel> CreateOrUpdateThem(List<IBaseModel> models) {
+        if(models != null)
+        {
+            try {
+                var data = baseRepository.saveAll(models);
+                List<IBaseModel> list = new ArrayList<IBaseModel>();
+                for (var s : data) {
+                    list.add((IBaseModel)s);
+                }
+                return list;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return new ArrayList<IBaseModel>();
+            }
+        }
+        return new ArrayList<IBaseModel>();
+
+    }
+
+
+    @Override
+    public List<IBaseModel> GetAll() {
+        var model = baseRepository.findAll();
+        if(model != null)
+        {
+            try {
+                List<IBaseModel> list = new ArrayList<IBaseModel>();
+                for (var s : model) {
+                    list.add((IBaseModel)s);
+                }
+                return list;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                return new ArrayList<IBaseModel>();
+            }
+
+        }
+        else
+        {
+            return new ArrayList<IBaseModel>();
         }
     }
 
@@ -82,7 +188,7 @@ public class BaseService implements IBaseService {
         }
     }
 
-
+    @Override
     public IBaseModel CreateOrUpdate(IBaseModel model) {
         try{
             var result = baseRepository.save(model);
@@ -94,10 +200,19 @@ public class BaseService implements IBaseService {
             return null;
         }
     }
-
+    @Override
     public IBaseModel CreateOrGet(IBaseModel model) {
         try{
-            var isExisting = baseRepository.existsById(model.getId());
+            var isExisting = Boolean.FALSE;
+            var id_m = model.getId();
+            if(id_m == null)
+            {
+                isExisting = Boolean.FALSE;
+            }
+            else{
+                isExisting = baseRepository.existsById(model.getId());
+            }
+
             if(isExisting==Boolean.TRUE)
             {
                 var elem =  baseRepository.findById(model.getId());
@@ -109,6 +224,28 @@ public class BaseService implements IBaseService {
                 {
                     return null;
                 }
+            }
+            else
+            {
+                var result = baseRepository.save(model);
+                return (IBaseModel)result;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    @Override
+    public IBaseModel CreateOrUpdateOrGet(IBaseModel model) {
+        try{
+            var element = CreateOrGet(model);
+            if(element.equals(model))
+            {
+                return element;
             }
             else
             {

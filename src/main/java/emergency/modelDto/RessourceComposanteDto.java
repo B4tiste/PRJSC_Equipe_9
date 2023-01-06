@@ -19,6 +19,10 @@ public class RessourceComposanteDto  implements IBaseModelDto {
     @JsonProperty("isAvailable")
     private boolean isAvailable;
 
+    @NotNull
+    @JsonProperty("ressource")
+    private Long ressource;
+
     public Long getId() {
         return id;
     }
@@ -30,4 +34,9 @@ public class RessourceComposanteDto  implements IBaseModelDto {
     public boolean isAvailable() {
         return isAvailable;
     }
+
+    public Long getRessource() {
+        return ressource;
+    }
+
 }

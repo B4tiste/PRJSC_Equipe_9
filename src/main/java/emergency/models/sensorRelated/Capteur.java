@@ -1,10 +1,12 @@
 package emergency.models.sensorRelated;
 
+import emergency.baseReferentiel.ServiceDefinitions;
 import emergency.interfacesDefinition.*;
 
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @Entity
@@ -22,7 +24,7 @@ public class Capteur implements IBaseModel {
     @JoinColumn(name = "ID_MICROCONTROLLER")
     private Microcontroller microcontroller;
 
-    @OneToMany(mappedBy = "capteur")
+    @OneToMany(mappedBy = "capteur", cascade = CascadeType.ALL)
     private List<CapteurDonnees> capteurDonnees;
 
     @ManyToOne
@@ -77,5 +79,44 @@ public class Capteur implements IBaseModel {
 
     public void setCapteurType(CapteurType capteurType) {
         this.capteurType = capteurType;
+    }
+
+
+    public Capteur Save(ServiceDefinitions ref, Boolean cascade) {
+        Capteur addr;
+        try {
+
+            if (cascade == Boolean.TRUE) {
+
+                List<CapteurDonnees> capteurDonnees = getCapteurDonnees();
+                for (int c = 0; c < capteurDonnees.size(); c++) {
+                    CapteurDonnees capteurDonnee = capteurDonnees.get(c);
+                    CapteurDonnees savedCapteurDonnee = capteurDonnee.Save(ref, cascade);
+                    if (savedCapteurDonnee != null) {
+                        capteurDonnees.set(c, savedCapteurDonnee);
+                    }
+                    setCapteurDonnees(capteurDonnees);
+                }
+            }
+            addr = (Capteur)ref.getCapteurService().CreateOrUpdateOrGet(this);
+            return addr;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Capteur capteur = (Capteur) o;
+        return
+                Objects.equals(identifier, capteur.identifier) &&
+                Objects.equals(microcontroller, capteur.microcontroller) &&
+                Objects.equals(capteurDonnees, capteur.capteurDonnees) &&
+                Objects.equals(capteurType, capteur.capteurType);
     }
 }

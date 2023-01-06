@@ -14,6 +14,16 @@ import java.util.Optional;
 @Service
 public class UrgenceService extends BaseService {
 
+    public UrgenceService(TypeRessourceService typeRessourceService, TypeUrgenceService typeUrgenceService, IncidentService incidentService, AdresseService adresseService, PrioriteService prioriteService, StatutService statutService) {
+        this.typeRessourceService = typeRessourceService;
+        this.typeUrgenceService = typeUrgenceService;
+        this.incidentService = incidentService;
+        this.adresseService = adresseService;
+        this.prioriteService = prioriteService;
+        this.statutService = statutService;
+
+    }
+
     @Autowired
     public TypeRessourceService typeRessourceService;
     @Autowired
@@ -62,7 +72,7 @@ public class UrgenceService extends BaseService {
             try{
                 if(adresseOptIncident.isPresent())
                 {
-                    createdAdresse = (Adresse) this.adresseService.CreateOrGet(adresseOptIncident.get());
+                    createdAdresse = (Adresse) this.adresseService.CreateOrUpdateOrGet(adresseOptIncident.get());
                     if(createdAdresse==null) {
                         manoeuvre = Boolean.FALSE;
                         System.out.println("[Urgence Service] > CreateUrgence > Adresse creation for incident return null");
@@ -78,7 +88,7 @@ public class UrgenceService extends BaseService {
                             var incident = urgence.getIncident();
                             incident.setAdresse(createdAdresse);
                             try{
-                                var inc = (Incident)this.incidentService.Update(incident);
+                                var inc = (Incident)this.incidentService.CreateOrUpdateOrGet(incident);
                                 if(inc != null)
                                 {
                                     urgence.setIncident(inc);
@@ -115,7 +125,7 @@ public class UrgenceService extends BaseService {
             try{
                 if(incidentOpt.isPresent())
                 {
-                    createdIncident = (Incident)this.incidentService.CreateOrGet(incidentOpt.get());
+                    createdIncident = (Incident)this.incidentService.CreateOrUpdateOrGet(incidentOpt.get());
                     if(createdIncident==null) {
                         manoeuvre = Boolean.FALSE;
                         System.out.println("[Urgence Service] > CreateUrgence > incident creation return null");
@@ -136,7 +146,7 @@ public class UrgenceService extends BaseService {
             if(manoeuvre == Boolean.TRUE)
             {
                 try{
-                    createdUrgence = (Urgence)this.Create(urgence);
+                    createdUrgence = (Urgence)this.CreateOrUpdateOrGet(urgence);
                 }
                 catch(Exception e)
                 {

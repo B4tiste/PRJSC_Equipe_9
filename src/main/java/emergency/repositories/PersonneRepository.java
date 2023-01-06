@@ -1,5 +1,6 @@
 package emergency.repositories;
 
+import emergency.models.Incident;
 import emergency.models.Personne;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface PersonneRepository extends PagingAndSortingRepository<Personne, Long>, CrudRepository<Personne,Long> {
+public interface PersonneRepository extends PagingAndSortingRepository<Personne, Long>, CrudRepository<Personne, Long> {
 
     List<Personne> findByNom(@Param("NOM") String nom);
 

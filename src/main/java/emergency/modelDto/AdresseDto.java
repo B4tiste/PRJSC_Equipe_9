@@ -34,23 +34,23 @@ public class AdresseDto implements IBaseModelDto {
         return id;
     }
 
-    public String getRueAdresse() {
+    public String getRue() {
         return rue;
     }
 
-    public String getVilleAdresse() {
+    public String getVille() {
         return ville;
     }
 
-    public String getEtatAdresse() {
+    public String getEtat() {
         return etat;
     }
 
-    public String getCodePostalAdresse() {
+    public String getCodePostal() {
         return codePostal;
     }
 
-    public String getPaysAdresse() {
+    public String getPays() {
         return pays;
     }
 }

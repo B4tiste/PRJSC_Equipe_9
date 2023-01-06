@@ -1,9 +1,11 @@
 package emergency.models.sensorRelated;
 
+import emergency.baseReferentiel.ServiceDefinitions;
 import emergency.interfacesDefinition.IBaseModel;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "MICROCONTROLLER")
@@ -26,7 +28,7 @@ public class Microcontroller implements IBaseModel {
     @JoinColumn(name = "ID_ETAT")
     private Etat etat;
 
-    @OneToMany(mappedBy = "microcontroller")
+    @OneToMany(mappedBy = "microcontroller", cascade = CascadeType.ALL)
     private List<Capteur> capteurs;
 
     public Microcontroller() {
@@ -86,5 +88,42 @@ public class Microcontroller implements IBaseModel {
 
     public void setCapteurs(List<Capteur> capteurs) {
         this.capteurs = capteurs;
+    }
+
+    public Microcontroller Save(ServiceDefinitions ref, Boolean cascade) {
+        Microcontroller mc;
+        try {
+
+            if (cascade == Boolean.TRUE) {
+
+                List<Capteur> capteurs = getCapteurs();
+                for (int c = 0; c < capteurs.size(); c++) {
+                    Capteur capteur = capteurs.get(c);
+                    Capteur savedCapteur = capteur.Save(ref, cascade);
+                    if (savedCapteur != null) {
+                        capteurs.set(c, savedCapteur);
+                    }
+                    setCapteurs(capteurs);
+                }
+            }
+            mc = (Microcontroller)ref.getMicrocontrollerService().CreateOrUpdateOrGet(this);
+            return mc;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Microcontroller that = (Microcontroller) o;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(latitude, that.latitude) &&
+                Objects.equals(longitude, that.longitude) &&
+                Objects.equals(nom, that.nom) &&
+                Objects.equals(etat, that.etat) &&
+                Objects.equals(capteurs, that.capteurs);
     }
 }

@@ -3,14 +3,17 @@ package emergency.services.referentiel;
 import emergency.models.Priorite;
 import emergency.repositories.referentiel.PrioriteRepository;
 import emergency.services.BaseService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PrioriteService extends BaseService {
 
-    @Autowired
-    private PrioriteRepository prioriteRepository;
+    private final PrioriteRepository prioriteRepository;
+
+    public PrioriteService(PrioriteRepository prioriteRepository) {
+        this.prioriteRepository = prioriteRepository;
+        this.baseRepository = prioriteRepository;
+    }
 
     public Priorite getByName(String name)
     {

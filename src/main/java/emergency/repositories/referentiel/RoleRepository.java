@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RoleRepository extends PagingAndSortingRepository<Role, Long>, CrudRepository<Role,Long> {
+public interface RoleRepository extends PagingAndSortingRepository<Role, Long>, CrudRepository<Role, Long> {
 
     List<Role> findByNom(@Param("NOM") String name);
 

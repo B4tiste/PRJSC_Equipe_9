@@ -11,7 +11,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 @Repository
-public interface StatutRepository extends PagingAndSortingRepository<Statut, Long>, CrudRepository<Statut,Long> {
+public interface StatutRepository extends PagingAndSortingRepository<Statut, Long>, CrudRepository<Statut, Long> {
 
     List<Statut> findByNom(@Param("NOM") String name);
 

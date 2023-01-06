@@ -1,8 +1,6 @@
 package emergency.mapper;
 
 import emergency.baseReferentiel.RepositoryDefinitions;
-import emergency.baseReferentiel.RepositoryDefinitions;
-import emergency.mapper.MapInst;
 import emergency.interfacesDefinition.IBaseModel;
 import emergency.interfacesDefinition.IBaseModelDto;
 import emergency.modelDto.*;
@@ -21,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Component
-public class BaseMapper extends RepositoryDefinitions {
+public class BaseMapper {
 
     private ModelMapper mapper;
 
@@ -34,12 +32,16 @@ public class BaseMapper extends RepositoryDefinitions {
     public HashMap<Class<? extends IBaseModel>, Class<? extends IBaseModelDto>> mapTypeReverse =
             new HashMap<>();
 
-    public BaseMapper()
+    @Autowired
+    private RepositoryDefinitions _repDef;
+
+    public BaseMapper(RepositoryDefinitions repositoryDefinitions)
     {
         this.mapper = new ModelMapper();
         this.Init();
         this.InitMapRules();
         this.DoMapping();
+        this._repDef = repositoryDefinitions;
     }
 
     public void DoMapping()
@@ -65,61 +67,61 @@ public class BaseMapper extends RepositoryDefinitions {
         this.mapper.createTypeMap(UrgenceDto.class, Urgence.class)
                 .addMappings(mapper->mapper.using(ctx->{
                     Long id = (Long)ctx.getSource();
-                    return id != null ? this.incidentRepository.findById(id).orElse(null) : null;
+                    return id != null ? _repDef.getIncidentRepository().findById(id).orElse(null) : null;
                 }).map(UrgenceDto::getIncidentDto, Urgence::setIncident))
                 .addMappings(mapper->mapper.using(ctx->{
                     Long id = (Long)ctx.getSource();
-                    return id != null ? this.typeUrgenceRepository.findById(id).orElse(null) : null;
+                    return id != null ? _repDef.getTypeUrgenceRepository().findById(id).orElse(null) : null;
                 }).map(UrgenceDto::getTypeRessourceDto, Urgence::setType))
                 .addMappings(mapper->mapper.using(ctx->{
                     Long id = (Long)ctx.getSource();
-                    return id != null ? this.statutRepository.findById(id).orElse(null) : null;
+                    return id != null ? _repDef.getStatutRepository().findById(id).orElse(null) : null;
                 }).map(UrgenceDto::getStatutDto, Urgence::setStatut));
 
         this.mapper.createTypeMap(emergency.modelDto.sensorRelated.CapteurDto.class, emergency.models.sensorRelated.Capteur.class)
                 .addMappings(mapper -> mapper.using(ctx -> {
                     Long id = (Long)ctx.getSource();
-                    return id != null ? this.microcontrollerRepository.findById(id).orElse(null) : null;
+                    return id != null ? _repDef.getMicrocontrollerRepository().findById(id).orElse(null) : null;
                 }).map(emergency.modelDto.sensorRelated.CapteurDto::getMicrocontroller, emergency.models.sensorRelated.Capteur::setMicrocontroller))
                 .addMappings(mapper -> mapper.using(ctx -> {
                     Long id = (Long)ctx.getSource();
-                    return id != null ? this.typeCapteurRepository.findById(id).orElse(null) : null;
+                    return id != null ? _repDef.getTypeCapteurRepository().findById(id).orElse(null) : null;
                 }).map(emergency.modelDto.sensorRelated.CapteurDto::getSensorType, emergency.models.sensorRelated.Capteur::setCapteurType));
 
         this.mapper.createTypeMap(CentreDto.class, Centre.class)
                 .addMappings(mapper -> mapper.using(ctx -> {
                     Long id = (Long)ctx.getSource();
-                    return id != null ? ressourceComposanteRepository.findById(id).orElse(null) : null;
-                }).map(CentreDto::getRessourceComposanteDtos, Centre::setRessourceComposantes));
+                    return id != null ? _repDef.getRessourceComposanteRepository().findById(id).orElse(null) : null;
+                }).map(CentreDto::getRessourceComposanteDtos, Centre::setRessource));
 
         this.mapper.createTypeMap(RessourceDto.class, Ressource.class)
                 .addMappings(mapper->mapper.using(ctx->{
                     Long id = (Long)ctx.getSource();
-                    return this.typeRessourceRepository.findById(id).orElse(null);
+                    return _repDef.getTypeRessourceRepository().findById(id).orElse(null);
                 }).map(RessourceDto::getTypeRessourceDto, Ressource::setType))
                 .addMappings(mapper->mapper.using(ctx->{
                     Long id = (Long)ctx.getSource();
-                    return this.statutRepository.findById(id).orElse(null);
+                    return _repDef.getStatutRepository().findById(id).orElse(null);
                 }).map(RessourceDto::getStatutDto, Ressource::setStatut))
                 .addMappings(mapper->mapper.using(ctx->{
                     Long id = (Long)ctx.getSource();
-                    return this.ressourceComposanteRepository.findById(id).orElse(null);
-                }).map(RessourceDto::getRessourceComposanteDto, Ressource::setRessourceComposante));
+                    return _repDef.getRessourceComposanteRepository().findByRessource(id);
+                }).map(RessourceDto::getId, Ressource::setRessourceComposantes));
 
         this.mapper.createTypeMap(PersonneDto.class, Personne.class)
                 .addMappings(mapper->mapper.using(ctx->{
                     Long id = (Long)ctx.getSource();
-                    return roleRepository.findById(id).orElse(null);
+                    return _repDef.getRoleRepository().findById(id).orElse(null);
                 }).map(PersonneDto::getRoleDto, Personne::setRole));
 
         this.mapper.createTypeMap(IncidentDto.class, Incident.class)
                 .addMappings(mapper->mapper.using(ctx->{
                     Long id = (Long)ctx.getSource();
-                    return id != null ? this.adresseRepository.findById(id).orElse(null) : null;
+                    return id != null ? _repDef.getAdresseRepository().findById(id).orElse(null) : null;
                 }).map(IncidentDto::getAdresseDto, Incident::setAdresse))
                 .addMappings(mapper->mapper.using(ctx->{
                     Long id = (Long)ctx.getSource();
-                    return id != null ? this.prioriteRepository.findById(id).orElse(null) : null;
+                    return id != null ? _repDef.getPrioriteRepository().findById(id).orElse(null) : null;
                 }).map(IncidentDto::getPrioriteDto, Incident::setPriorite));
 
     }

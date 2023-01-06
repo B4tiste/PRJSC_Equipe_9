@@ -1,13 +1,17 @@
 package emergency.models;
 
+import emergency.baseReferentiel.ServiceDefinitions;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @Entity
 @Table(name = "RESSOURCECOMPOSANTE")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class RessourceComposante implements IBaseModel  {
 
     @Id
@@ -24,13 +28,11 @@ public class RessourceComposante implements IBaseModel  {
     @OneToMany(mappedBy = "ressourceComposante", cascade = CascadeType.ALL)
     private List<Personne> personnes;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "ID_RESSOURCE")
     private Ressource ressource;
 
-    @ManyToOne
-    @JoinColumn(name = "ID_CENTRE")
-    private Centre centre;
+
 
 
     public RessourceComposante() {
@@ -84,6 +86,37 @@ public class RessourceComposante implements IBaseModel  {
         this.personnes = personnes;
     }
 
+    public RessourceComposante Save(ServiceDefinitions ref, Boolean cascade)
+    {
+        RessourceComposante addr;
+        try{
+            addr = (RessourceComposante)ref.getRessourceComposanteService().CreateOrUpdateOrGet(this);
+            if(cascade == Boolean.TRUE)
+            {
+                var personnes = getPersonnes();
+                for(int c = 0;c<personnes.size();c++)
+                {
+                    var personne = personnes.get(c);
+                    personne.setRessourceComposante(addr);
+                    var pers = personne.Save(ref, cascade);
+                    if(pers != null)
+                    {
+                        personnes.set(c, pers);
+                    }
+                    setPersonnes(personnes);
+
+                }
+            }
+
+            return addr;
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return "RessourceComposante{" +
@@ -94,4 +127,16 @@ public class RessourceComposante implements IBaseModel  {
     }
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RessourceComposante that = (RessourceComposante) o;
+        return isAvailable == that.isAvailable && Objects.equals(nom, that.nom) && Objects.equals(personnes, that.personnes) && Objects.equals(ressource, that.ressource);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nom, isAvailable, personnes, ressource);
+    }
 }

@@ -13,9 +13,9 @@ import org.springframework.data.repository.query.Param;
 
 @Repository
 @Component
-public interface TypeRessourceRepository extends PagingAndSortingRepository<TypeRessource, Long>, CrudRepository<TypeRessource,Long> {
+public interface TypeRessourceRepository extends PagingAndSortingRepository<TypeRessource, Long>, CrudRepository<TypeRessource, Long> {
 
-    List<TypeRessource> findByNom(@Param("NOM") String nom);
+    List<TypeRessource> findByType(@Param("TYPE") String type);
 
     List<TypeRessource> findByValeur(@Param("VALEUR") Integer valeur);
 }

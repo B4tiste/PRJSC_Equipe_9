@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 @Component
-public interface TypeCapteurRepository extends PagingAndSortingRepository<CapteurType, Long>, CrudRepository<CapteurType,Long> {
+public interface TypeCapteurRepository extends PagingAndSortingRepository<CapteurType, Long>, CrudRepository<CapteurType, Long> {
 
     List<CapteurType> findByType(@Param("TYPE") String type);
 }

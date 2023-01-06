@@ -1,8 +1,10 @@
 package emergency.models;
 
+import emergency.baseReferentiel.ServiceDefinitions;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
 
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -14,8 +16,8 @@ public class TypeRessource implements IBaseModel  {
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "NOM")
-    private String nom;
+    @Column(name = "TYPE")
+    private String type;
 
     @Column(name = "VALEUR")
     private int valeur;
@@ -26,8 +28,8 @@ public class TypeRessource implements IBaseModel  {
     public TypeRessource() {
     }
 
-    public TypeRessource(String nom, int valeur) {
-        this.nom = nom;
+    public TypeRessource(String type, int valeur) {
+        this.type = type;
         this.valeur = valeur;
     }
     @Override
@@ -39,12 +41,12 @@ public class TypeRessource implements IBaseModel  {
         this.id = id;
     }
 
-    public String getNom() {
-        return nom;
+    public String getType() {
+        return type;
     }
 
-    public void setNom(String nom) {
-        this.nom = nom;
+    public void setType(String nom) {
+        this.type = nom;
     }
 
     public int getValeur() {
@@ -63,12 +65,39 @@ public class TypeRessource implements IBaseModel  {
         this.ressources = ressources;
     }
 
+    public TypeRessource Save(ServiceDefinitions ref, Boolean cascade)
+    {
+        TypeRessource addr;
+        try{
+            addr = (TypeRessource) ref.getTypeRessourceService().CreateOrUpdateOrGet(this);
+            return addr;
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return "TypeRessource{" +
                 "id=" + id +
-                ", nom='" + nom + '\'' +
+                ", nom='" + type + '\'' +
                 ", valeur=" + valeur +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TypeRessource that = (TypeRessource) o;
+        return valeur == that.valeur && Objects.equals(type, that.type) && Objects.equals(ressources, that.ressources);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, valeur, ressources);
     }
 }

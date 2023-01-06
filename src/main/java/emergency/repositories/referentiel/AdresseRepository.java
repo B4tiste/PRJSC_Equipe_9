@@ -11,7 +11,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 @Repository
-public interface AdresseRepository extends PagingAndSortingRepository<Adresse, Long>, CrudRepository<Adresse,Long> {
+public interface AdresseRepository extends PagingAndSortingRepository<Adresse, Long>, CrudRepository<Adresse, Long> {
 
     List<Adresse> findByRue(@Param("RUE") String rue);
     List<Adresse> findByVille(@Param("VILLE") String ville);

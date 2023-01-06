@@ -7,6 +7,7 @@ import emergency.models.Adresse;
 import emergency.models.Incident;
 import emergency.models.Urgence;
 import emergency.services.UrgenceService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -19,13 +20,12 @@ import java.util.Optional;
 @RequestMapping("/Urgence")
 public class UrgenceControllerBase extends emergency.controllers.BaseController {
 
-    //@Autowired
+    @Autowired
     public UrgenceService urgenceService;
 
     public UrgenceControllerBase(
     )
     {
-        this.urgenceService = new UrgenceService();
         this.setService(this.urgenceService);
 
     }
@@ -63,7 +63,7 @@ public class UrgenceControllerBase extends emergency.controllers.BaseController 
                     );
 
                     var modelDto = this.getBaseMapper().GetModelMapper().map(result, urgence.getClass());
-                    return (new ResponseEntity<UrgenceDto>((UrgenceDto)modelDto,HttpStatus.OK)) ;
+                    return (new ResponseEntity<UrgenceDto>(modelDto,HttpStatus.OK)) ;
                 }
                 catch(Exception e)
                 {

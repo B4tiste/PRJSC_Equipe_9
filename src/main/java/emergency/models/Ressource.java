@@ -1,7 +1,11 @@
 package emergency.models;
 
+import emergency.baseReferentiel.ServiceDefinitions;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
+
+import java.util.List;
+import java.util.Objects;
 
 
 @Entity
@@ -24,18 +28,26 @@ public class Ressource implements IBaseModel  {
     @JoinColumn(name = "ID_STATUT")
     private Statut statut;
 
-    @OneToOne
-    @JoinColumn(name = "ID_RESSOURCECOMPOSANTE")
-    private RessourceComposante ressourceComposante;
+    @OneToMany(mappedBy = "ressource", cascade = CascadeType.ALL)
+    private List<RessourceComposante> ressourceComposantes;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_CENTRE")
+    private Centre centre;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_URGENCE")
+    private Urgence urgence;
 
     public Ressource() {
     }
 
-    public Ressource(String nom, TypeRessource type, Statut statut, RessourceComposante ressourceComposante) {
+    public Ressource(String nom, TypeRessource type, Statut statut, List<RessourceComposante> ressourceComposantes, Centre centre) {
         this.nom = nom;
         this.type = type;
         this.statut = statut;
-        this.ressourceComposante = ressourceComposante;
+        this.ressourceComposantes = ressourceComposantes;
+        this.centre = centre;
     }
 
 
@@ -72,12 +84,20 @@ public class Ressource implements IBaseModel  {
         this.statut = statut;
     }
 
-    public RessourceComposante getRessourceComposante() {
-        return ressourceComposante;
+    public List<RessourceComposante> getRessourceComposantes() {
+        return ressourceComposantes;
     }
 
-    public void setRessourceComposante(RessourceComposante ressourceComposante) {
-        this.ressourceComposante = ressourceComposante;
+    public void setRessourceComposantes(List<RessourceComposante> ressources) {
+        this.ressourceComposantes = ressources;
+    }
+
+    public Centre getCentre() {
+        return centre;
+    }
+
+    public void setCentre(Centre centre) {
+        this.centre = centre;
     }
 
     @Override
@@ -87,7 +107,44 @@ public class Ressource implements IBaseModel  {
                 ", nom='" + nom + '\'' +
                 ", type=" + type +
                 ", statut=" + statut +
-                ", ressourceComposante=" + ressourceComposante +
                 '}';
+    }
+
+    public Ressource Save(ServiceDefinitions ref, Boolean cascade) {
+        Ressource addr;
+        try {
+            addr = (Ressource)ref.getRessourceService().CreateOrUpdateOrGet(this);
+            if (cascade == Boolean.TRUE) {
+
+                List<RessourceComposante> ressourceComposantes = getRessourceComposantes();
+                for (int c = 0; c < ressourceComposantes.size(); c++) {
+                    RessourceComposante ressourceComposante = ressourceComposantes.get(c);
+                    ressourceComposante.setRessource(addr);
+                    RessourceComposante savedRessourceComposante = ressourceComposante.Save(ref, cascade);
+                    if (savedRessourceComposante != null) {
+                        ressourceComposantes.set(c, savedRessourceComposante);
+                    }
+                    setRessourceComposantes(ressourceComposantes);
+                }
+            }
+
+            return addr;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Ressource ressource = (Ressource) o;
+        return Objects.equals(nom, ressource.nom) && Objects.equals(type, ressource.type) && Objects.equals(statut, ressource.statut) && Objects.equals(ressourceComposantes, ressource.ressourceComposantes) && Objects.equals(centre, ressource.centre) && Objects.equals(urgence, ressource.urgence);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nom, type, statut, ressourceComposantes, centre, urgence);
     }
 }

@@ -1,21 +1,26 @@
 package emergency.services.type;
 
 import emergency.models.TypeRessource;
+import emergency.models.TypeUrgence;
 import emergency.repositories.type.TypeRessourceRepository;
+import emergency.repositories.type.TypeUrgenceRepository;
 import emergency.services.BaseService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TypeUrgenceService extends BaseService {
 
-        @Autowired
-        private TypeRessourceRepository typeRessourceRepository;
+    private final TypeUrgenceRepository typeUrgenceRepository;
 
-        public TypeRessource getByName(String name)
+    public TypeUrgenceService(TypeUrgenceRepository typeUrgenceRepository) {
+        this.typeUrgenceRepository = typeUrgenceRepository;
+        this.baseRepository = typeUrgenceRepository;
+    }
+
+    public TypeUrgence getByName(String name)
         {
             try{
-                var type =  this.typeRessourceRepository.findByNom(name);
+                var type =  this.typeUrgenceRepository.findByNom(name);
                 if(type.isEmpty())
                 {
                     return null;
@@ -33,23 +38,23 @@ public class TypeUrgenceService extends BaseService {
 
         }
 
-        public TypeRessource getNonInitie()
+        public TypeUrgence getNonInitie()
         {
             return this.getByName("NON_INITIE");
         }
-        public TypeRessource getDemarre()
+        public TypeUrgence getDemarre()
         {
             return this.getByName("DEMARRE");
         }
-        public TypeRessource getEnCours()
+        public TypeUrgence getEnCours()
         {
             return this.getByName("EN_COURS");
         }
-        public TypeRessource getPause()
+        public TypeUrgence getPause()
         {
             return this.getByName("PAUSE");
         }
-        public TypeRessource getArrete()
+        public TypeUrgence getArrete()
         {
             return this.getByName("ARRETE");
         }

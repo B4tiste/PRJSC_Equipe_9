@@ -1,8 +1,11 @@
 package emergency.models;
 
+import emergency.baseReferentiel.ServiceDefinitions;
 import jakarta.persistence.*;
 
 import java.util.List;
+import java.util.Objects;
+
 import emergency.interfacesDefinition.*;
 
 @Entity
@@ -10,7 +13,7 @@ import emergency.interfacesDefinition.*;
 public class Centre implements IBaseModel  {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
 
@@ -26,17 +29,22 @@ public class Centre implements IBaseModel  {
     @Column(name = "LONGITUDE")
     private Double longitude;
 
-    @OneToMany(mappedBy = "centre")
-    private List<RessourceComposante> ressourceComposantes;
+    @ManyToOne
+    @JoinColumn(name = "ID_ADRESSE")
+    private Adresse adresse;
+
+    @OneToMany(mappedBy = "centre", cascade = CascadeType.ALL)
+    private List<Ressource> ressources;
 
     public Centre() {
     }
 
-    public Centre(String nom, Boolean isAvailable, Double latitude, Double longitude) {
+    public Centre(String nom, Boolean isAvailable, Double latitude, Double longitude, Adresse adresse) {
         this.nom = nom;
         this.isAvailable = isAvailable;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.adresse = adresse;
     }
     @Override
     public Long getId() {
@@ -79,11 +87,63 @@ public class Centre implements IBaseModel  {
         this.longitude = longitude;
     }
 
-    public List<RessourceComposante> getRessourceComposantes() {
-        return ressourceComposantes;
+    public List<Ressource> getRessource() {
+        return ressources;
     }
 
-    public void setRessourceComposantes(List<RessourceComposante> ressourceComposantes) {
-        this.ressourceComposantes = ressourceComposantes;
+    public void setRessource(List<Ressource> ressources) {
+        this.ressources = ressources;
+    }
+
+    public Adresse getAdresse() {
+        return adresse;
+    }
+
+    public void setAdresse(Adresse adresse) {
+        this.adresse = adresse;
+    }
+
+
+    public Centre Save(ServiceDefinitions ref, Boolean cascade) {
+        Centre addr;
+        try {
+            if (getAdresse() != null && cascade == Boolean.TRUE) {
+                setAdresse(getAdresse().Save(ref, cascade));
+            }
+            addr = (Centre)ref.getCentreService().CreateOrUpdateOrGet(this);
+            if (cascade == Boolean.TRUE) {
+
+                List<Ressource> ressources = getRessource();
+                for (int c = 0; c < ressources.size(); c++) {
+                    Ressource ressource = ressources.get(c);
+                    ressource.setCentre(addr);
+                    Ressource savedRessource = ressource.Save(ref, cascade);
+                    if (savedRessource != null) {
+                        ressources.set(c, savedRessource);
+                    }
+                    setRessource(ressources);
+                }
+            }
+
+            return addr;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Centre centre = (Centre) o;
+        return Objects.equals(nom, centre.nom) && Objects.equals(isAvailable, centre.isAvailable) && Objects.equals(latitude, centre.latitude) && Objects.equals(longitude, centre.longitude) && Objects.equals(ressources, centre.ressources);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nom, isAvailable, latitude, longitude, ressources);
     }
 }

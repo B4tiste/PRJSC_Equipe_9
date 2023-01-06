@@ -13,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Controller
 public class BaseController {
 
@@ -108,6 +111,53 @@ public class BaseController {
         {
             return (new ResponseEntity<IBaseModelDto>(HttpStatus.NOT_FOUND));
         }
+    }
+
+
+    public ResponseEntity<List<IBaseModelDto>> GetAll()
+    {
+        List<IBaseModelDto> modelDtos = new ArrayList<>();
+        if(service == null)
+        {
+            return (new ResponseEntity<List<IBaseModelDto>>(HttpStatus.NOT_IMPLEMENTED));
+        }
+        try {
+            var modelList = this.service.GetAll();
+            if(modelList == null)
+            {
+                return (new ResponseEntity<List<IBaseModelDto>>(HttpStatus.NOT_FOUND));
+            }
+            else
+            {
+
+                for(var model : modelList)
+                {
+                    IBaseModelDto modelDto;
+                    try {
+                        modelDto = this.getBaseMapper().GetModelMapper().map(model, IBaseModelDto.class);
+                        if(modelDto == null)
+                        {
+                            return (new ResponseEntity<List<IBaseModelDto>>(HttpStatus.NOT_FOUND));
+                        }
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                        return (new ResponseEntity<List<IBaseModelDto>>(HttpStatus.EXPECTATION_FAILED));
+                    }
+                    if(modelDto != null)
+                    {
+                        modelDtos.add(modelDto);
+                    }
+                }
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            return (new ResponseEntity<List<IBaseModelDto>>(HttpStatus.NOT_FOUND));
+        }
+        return (new ResponseEntity<List<IBaseModelDto>>(modelDtos, HttpStatus.OK));
     }
 
     public ResponseEntity<IBaseModelDto> Create(@RequestBody IBaseModelDto model)

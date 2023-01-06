@@ -1,8 +1,10 @@
 package emergency.models;
 
+import emergency.baseReferentiel.ServiceDefinitions;
 import emergency.interfacesDefinition.IBaseModel;
 import jakarta.persistence.*;
 
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -63,6 +65,20 @@ public class TypeUrgence implements IBaseModel {
         this.urgences = urgences;
     }
 
+    public TypeUrgence Save(ServiceDefinitions ref, Boolean cascade)
+    {
+        TypeUrgence addr;
+        try{
+            addr = (TypeUrgence) ref.getTypeUrgenceService().CreateOrUpdateOrGet(this);
+            return addr;
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return "TypeUrgence{" +
@@ -70,5 +86,18 @@ public class TypeUrgence implements IBaseModel {
                 ", nom='" + nom + '\'' +
                 ", valeur=" + valeur +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TypeUrgence that = (TypeUrgence) o;
+        return valeur == that.valeur && Objects.equals(nom, that.nom) && Objects.equals(urgences, that.urgences);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nom, valeur, urgences);
     }
 }

@@ -14,11 +14,19 @@ public class EtatDto implements IBaseModelDto {
     @JsonProperty("value")
     private String value;
 
+    @NotNull
+    @JsonProperty("nom")
+    private String nom;
+
     public Long getId() {
         return id;
     }
 
     public String getValue() {
         return value;
+    }
+
+    public String getNom() {
+        return nom;
     }
 }

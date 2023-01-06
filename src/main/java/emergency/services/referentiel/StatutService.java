@@ -3,14 +3,17 @@ package emergency.services.referentiel;
 import emergency.models.Statut;
 import emergency.repositories.referentiel.StatutRepository;
 import emergency.services.BaseService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class StatutService extends BaseService {
 
-    @Autowired
-    private StatutRepository statutRepository;
+    private final StatutRepository statutRepository;
+
+    public StatutService(StatutRepository statutRepository) {
+        this.statutRepository = statutRepository;
+        this.baseRepository = statutRepository;
+    }
 
     public Statut getByName(String name)
     {

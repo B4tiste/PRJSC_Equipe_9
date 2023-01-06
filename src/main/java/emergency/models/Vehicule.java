@@ -1,6 +1,9 @@
 package emergency.models;
 
+import emergency.baseReferentiel.ServiceDefinitions;
 import jakarta.persistence.*;
+
+import java.util.Objects;
 
 @Entity
 @Table(name = "VEHICULE")
@@ -57,5 +60,35 @@ public class Vehicule extends RessourceComposante {
 
     public void setLongitude(Long longitude) {
         this.longitude = longitude;
+    }
+
+
+    public Vehicule Save(ServiceDefinitions ref, Boolean cascade) {
+        Vehicule addr;
+        try {
+            addr = (Vehicule)ref.getVehicleService().CreateOrUpdateOrGet(this);
+            if (cascade == Boolean.TRUE) {
+                //à faire
+            }
+            return addr;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Vehicule vehicule = (Vehicule) o;
+        return Objects.equals(capacite, vehicule.capacite) && Objects.equals(latitude, vehicule.latitude) && Objects.equals(longitude, vehicule.longitude);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), capacite, latitude, longitude);
     }
 }

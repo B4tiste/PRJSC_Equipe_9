@@ -1,7 +1,10 @@
 package emergency.models;
 
+import emergency.baseReferentiel.ServiceDefinitions;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
+
+import java.util.Objects;
 
 @Entity
 @Table(name = "PERSONNE")
@@ -76,6 +79,30 @@ public class Personne implements IBaseModel  {
         this.ressourceComposante = ressourceComposante;
     }
 
+    public Personne Save(ServiceDefinitions ref, Boolean cascade)
+    {
+        Personne addr;
+        try{
+            addr = (Personne) ref.getPersonneService().CreateOrUpdateOrGet(this);
+            return addr;
+        }catch (Exception e)
+        {
+            e.printStackTrace();
 
+        }
+        return null;
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Personne personne = (Personne) o;
+        return Objects.equals(nom, personne.nom) && Objects.equals(prenom, personne.prenom) && Objects.equals(role, personne.role) && Objects.equals(ressourceComposante, personne.ressourceComposante);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nom, prenom, role, ressourceComposante);
+    }
 }

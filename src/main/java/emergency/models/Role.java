@@ -1,8 +1,10 @@
 package emergency.models;
 
+import emergency.baseReferentiel.ServiceDefinitions;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
 
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -10,7 +12,7 @@ import java.util.Set;
 public class Role implements IBaseModel  {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
 
@@ -62,5 +64,32 @@ public class Role implements IBaseModel  {
 
     public void setPersonnes(Set<Personne> personnes) {
         this.personnes = personnes;
+    }
+
+    public Role Save(ServiceDefinitions ref, Boolean cascade)
+    {
+        Role addr;
+        try{
+            addr = (Role)ref.getRoleService().CreateOrUpdateOrGet(this);
+            return addr;
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }
+        return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Role role = (Role) o;
+        return Objects.equals(nom, role.nom) && Objects.equals(valeur, role.valeur) && Objects.equals(personnes, role.personnes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nom, valeur, personnes);
     }
 }

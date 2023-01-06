@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 @Repository
 @Component
-public interface IncidentRepository extends PagingAndSortingRepository<Incident, Long>, CrudRepository<Incident,Long> {
+public interface IncidentRepository extends  PagingAndSortingRepository<Incident, Long>, CrudRepository<Incident, Long>  {
 
     List<Incident> findByNom(@Param("NOM") String nom);
 

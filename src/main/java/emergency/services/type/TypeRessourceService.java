@@ -3,19 +3,22 @@ package emergency.services.type;
 import emergency.models.TypeRessource;
 import emergency.repositories.type.TypeRessourceRepository;
 import emergency.services.BaseService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TypeRessourceService extends BaseService {
 
-        @Autowired
-        private TypeRessourceRepository typeRessourceRepository;
+        private final TypeRessourceRepository typeRessourceRepository;
 
-        public TypeRessource getByName(String name)
+        public TypeRessourceService(TypeRessourceRepository typeRessourceRepository) {
+                this.typeRessourceRepository = typeRessourceRepository;
+                this.baseRepository = typeRessourceRepository;
+        }
+
+        public TypeRessource getByType(String type_d)
         {
                 try{
-                        var type =  this.typeRessourceRepository.findByNom(name);
+                        var type =  this.typeRessourceRepository.findByType(type_d);
                         if(type.isEmpty())
                         {
                                 return null;

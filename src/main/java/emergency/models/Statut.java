@@ -1,8 +1,10 @@
 package emergency.models;
 
+import emergency.baseReferentiel.ServiceDefinitions;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
 
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -21,7 +23,7 @@ public class Statut implements IBaseModel  {
     private int valeur;
 
 
-    @OneToMany(mappedBy = "statut")
+    @OneToMany(mappedBy = "statut", cascade = CascadeType.ALL)
     private Set<Urgence> ressources;
 
 
@@ -65,6 +67,20 @@ public class Statut implements IBaseModel  {
         this.ressources = ressources;
     }
 
+    public Statut Save(ServiceDefinitions ref, Boolean cascade)
+    {
+        Statut addr;
+        try{
+            addr = (Statut) ref.getStatutService().CreateOrUpdateOrGet(this);
+            return addr;
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return "Statut{" +
@@ -72,5 +88,18 @@ public class Statut implements IBaseModel  {
                 ", nom='" + nom + '\'' +
                 ", valeur=" + valeur +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Statut statut = (Statut) o;
+        return valeur == statut.valeur && Objects.equals(nom, statut.nom) && Objects.equals(ressources, statut.ressources);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nom, valeur, ressources);
     }
 }

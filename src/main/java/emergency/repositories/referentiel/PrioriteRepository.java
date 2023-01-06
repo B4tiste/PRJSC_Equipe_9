@@ -12,7 +12,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 @Repository
-public interface PrioriteRepository extends PagingAndSortingRepository<Priorite, Long>, CrudRepository<Priorite,Long> {
+public interface PrioriteRepository extends PagingAndSortingRepository<Priorite, Long>, CrudRepository<Priorite, Long> {
 
     List<Priorite> findByNom(@Param("NOM") String name);
 

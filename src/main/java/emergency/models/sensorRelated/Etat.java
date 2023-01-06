@@ -1,10 +1,12 @@
 package emergency.models.sensorRelated;
 
 
+import emergency.baseReferentiel.ServiceDefinitions;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "ETAT")
@@ -15,17 +17,28 @@ public class Etat implements IBaseModel {
     private Long id;
 
     @Column(name = "VALEUR")
-    private String valeur;
+    private int valeur;
 
-    @OneToMany(mappedBy = "etat")
+    @Column(name = "NOM")
+    private String nom;
+
+    @OneToMany(mappedBy = "etat", cascade = CascadeType.ALL)
     private List<Microcontroller> microcontrollers;
 
     public Etat() {
     }
 
-    public Etat(String valeur, List<Microcontroller> microcontrollers) {
+    public Etat(String nom, int valeur) {
         this.valeur = valeur;
-        this.microcontrollers = microcontrollers;
+        this.nom = nom;
+    }
+
+    public String getNom() {
+        return nom;
+    }
+
+    public void setNom(String nom) {
+        this.nom = nom;
     }
 
     public Long getId() {
@@ -36,11 +49,11 @@ public class Etat implements IBaseModel {
         this.id = id;
     }
 
-    public String getValeur() {
+    public int getValeur() {
         return valeur;
     }
 
-    public void setValeur(String valeur) {
+    public void setValeur(int valeur) {
         this.valeur = valeur;
     }
 
@@ -50,5 +63,32 @@ public class Etat implements IBaseModel {
 
     public void setMicrocontrollers(List<Microcontroller> microcontrollers) {
         this.microcontrollers = microcontrollers;
+    }
+
+    public Etat Save(ServiceDefinitions ref, Boolean cascade) {
+        Etat etat;
+        try {
+            etat = (Etat)ref.getEtatService().CreateOrUpdateOrGet(this);
+            if (cascade == Boolean.TRUE) {
+
+            }
+            return etat;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Etat etat = (Etat) o;
+        return Objects.equals(valeur, etat.valeur) && Objects.equals(nom, etat.nom);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(valeur, microcontrollers);
     }
 }

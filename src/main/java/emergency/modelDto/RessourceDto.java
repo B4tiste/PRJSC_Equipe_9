@@ -4,6 +4,8 @@ import emergency.interfacesDefinition.IBaseModelDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class RessourceDto  implements IBaseModelDto {
 
     @NotNull
@@ -21,10 +23,6 @@ public class RessourceDto  implements IBaseModelDto {
     @NotNull
     @JsonProperty("statutDto")
     private Long statutDto;
-
-    @NotNull
-    @JsonProperty("ressourceComposanteDto")
-    private Long ressourceComposanteDto;
 
 
 
@@ -44,7 +42,5 @@ public class RessourceDto  implements IBaseModelDto {
         return statutDto;
     }
 
-    public Long getRessourceComposanteDto() {
-        return ressourceComposanteDto;
-    }
+
 }

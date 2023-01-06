@@ -14,6 +14,11 @@ import java.util.List;
 @Service
 public class AdresseService extends BaseService {
 
+    public AdresseService(AdresseRepository adresseRepository) {
+        this.adresseRepository = adresseRepository;
+        this.baseRepository = adresseRepository;
+    }
+
     @Autowired
     private AdresseRepository adresseRepository;
 

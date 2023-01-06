@@ -1,8 +1,14 @@
 package emergency.models;
 
+import emergency.baseReferentiel.ReferentielDefinitions;
+import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.models.sensorRelated.Capteur;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
 
+import java.util.Objects;
+
+/* IMPORTANT : Model MUST contain an overwritten equals method for update to work (sinon pas de compare+update)*/
 @Entity
 @Table(name = "ADRESSE")
 public class Adresse implements IBaseModel  {
@@ -22,15 +28,16 @@ public class Adresse implements IBaseModel  {
     private String etat;
 
     @Column(name = "CODE_POSTAL")
-    private int codePostal;
+    private String codePostal;
 
     @Column(name = "PAYS")
     private String pays;
 
+
     public Adresse() {
     }
 
-    public Adresse(String rueAdresse, String villeAdresse, String etatAdresse, int codePostal, String paysAdresse) {
+    public Adresse(String rueAdresse, String villeAdresse, String etatAdresse, String codePostal, String paysAdresse) {
         this.rue = rueAdresse;
         this.ville = villeAdresse;
         this.etat = etatAdresse;
@@ -46,55 +53,84 @@ public class Adresse implements IBaseModel  {
         this.id = id;
     }
 
-    public String getRueAdresse() {
+    public String getRue() {
         return rue;
     }
 
-    public void setRueAdresse(String rueAdresse) {
-        this.rue = rueAdresse;
+    public void setRue(String rue) {
+        this.rue = rue;
     }
 
-    public String getVilleAdresse() {
+    public String getVille() {
         return ville;
     }
 
-    public void setVilleAdresse(String villeAdresse) {
-        this.ville = villeAdresse;
+    public void setVille(String ville) {
+        this.ville = ville;
     }
 
-    public String getEtatAdresse() {
+    public String getEtat() {
         return etat;
     }
 
-    public void setEtatAdresse(String etatAdresse) {
-        this.etat = etatAdresse;
+    public void setEtat(String etat) {
+        this.etat = etat;
     }
 
-    public int getCodePostalAdresse() {
+    public String getCodePostal() {
         return codePostal;
     }
 
-    public void setCodePostalAdresse(int codePostalAdresse) {
-        this.codePostal = codePostalAdresse;
+    public void setCodePostal(String codePostal) {
+        this.codePostal = codePostal;
     }
 
-    public String getPaysAdresse() {
+    public String getPays() {
         return pays;
     }
 
-    public void setPaysAdresse(String paysAdresse) {
-        this.pays = paysAdresse;
+    public void setPays(String pays) {
+        this.pays = pays;
+    }
+
+    public Adresse Save(ServiceDefinitions ref, Boolean cascade)
+    {
+        Adresse addr;
+        try{
+            addr = (Adresse)ref.getAdresseService().CreateOrUpdateOrGet(this);
+            return addr;
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }
+        return null;
     }
 
     @Override
     public String toString() {
         return "Adresse{" +
                 "id=" + id +
-                ", rueAdresse='" + rue + '\'' +
-                ", villeAdresse='" + ville + '\'' +
-                ", etatAdresse='" + etat + '\'' +
-                ", codePostalAdresse=" + codePostal +
-                ", paysAdresse='" + pays + '\'' +
+                ", rue='" + rue + '\'' +
+                ", ville='" + ville + '\'' +
+                ", etat='" + etat + '\'' +
+                ", codePostal=" + codePostal +
+                ", pays='" + pays + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Adresse adresse = (Adresse) o;
+        return Objects.equals(rue, adresse.rue) && Objects.equals(ville, adresse.ville)
+                && Objects.equals(etat, adresse.etat) && Objects.equals(codePostal, adresse.codePostal)
+                && Objects.equals(pays, adresse.pays);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(rue, ville, etat, codePostal, pays);
     }
 }

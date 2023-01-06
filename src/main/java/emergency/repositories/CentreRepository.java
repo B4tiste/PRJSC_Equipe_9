@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 @Component
-public interface CentreRepository extends PagingAndSortingRepository<Centre, Long>, CrudRepository<Centre,Long> {
+public interface CentreRepository extends  PagingAndSortingRepository<Centre, Long>, CrudRepository<Centre, Long> {
 
     List<Centre> findByNom(@Param("NOM") String nom);
 

@@ -1,7 +1,11 @@
 package emergency.models;
 
+import emergency.baseReferentiel.ServiceDefinitions;
 import jakarta.persistence.*;
 import java.sql.Date;
+import java.util.List;
+import java.util.Objects;
+
 import emergency.interfacesDefinition.*;
 
 @Entity
@@ -38,6 +42,10 @@ public class Incident implements IBaseModel  {
     @ManyToOne
     @JoinColumn(name = "ID_PRIORITE")
     private Priorite priorite;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_URGENCE")
+    private Urgence urgence;
 
     public Incident() {
     }
@@ -125,6 +133,24 @@ public class Incident implements IBaseModel  {
         this.priorite = priorite;
     }
 
+
+    public Incident Save(ServiceDefinitions ref, Boolean cascade) {
+        Incident addr;
+        try {
+
+            if (cascade == Boolean.TRUE) {
+                if (getAdresse() != null) {
+                    setAdresse(getAdresse().Save(ref, cascade));
+                }
+            }
+            addr = (Incident)ref.getIncidentService().CreateOrUpdateOrGet(this);
+            return addr;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return "Incident{" +
@@ -138,5 +164,18 @@ public class Incident implements IBaseModel  {
                 ", adresse=" + adresse +
                 ", priorite=" + priorite +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Incident incident = (Incident) o;
+        return Double.compare(incident.latitude, latitude) == 0 && Double.compare(incident.longitude, longitude) == 0 && Objects.equals(nom, incident.nom) && Objects.equals(dateCreation, incident.dateCreation) && Objects.equals(dateUpdate, incident.dateUpdate) && Objects.equals(descriptionIncident, incident.descriptionIncident) && Objects.equals(adresse, incident.adresse) && Objects.equals(priorite, incident.priorite);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nom, dateCreation, dateUpdate, latitude, longitude, descriptionIncident, adresse, priorite);
     }
 }
