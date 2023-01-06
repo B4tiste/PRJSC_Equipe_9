@@ -13,7 +13,7 @@ export default {
             /** @type L.map */
             map: null,
             zoom: 14,
-            minZoom: 12,
+            minZoom: 14,
             maxZoom: 18,
             /** @type array */
             centre: [45.7766461124361, 4.884143173956448],
@@ -48,8 +48,16 @@ export default {
                     iconUrl: "./images/caserne.png",
                     iconSize: [25, 25]
                 }),
+                caserneInactive: L.icon({
+                    iconUrl: "./images/caserne-inactive.png",
+                    iconSize: [25, 25]
+                }),
                 camion: L.icon({
                     iconUrl: "./images/camion-de-pompier.png",
+                    iconSize: [30, 30]
+                }),
+                camionEau: L.icon({
+                    iconUrl: "./images/camion-de-pompier-eau.png",
                     iconSize: [30, 30]
                 })
             },
@@ -63,12 +71,14 @@ export default {
             marqueursFeux: [],
             casernesFeatureCollection: [],
             caserneLaPlusProche: null,
-            routingLayer: null
+            routingLayer: null,
+            trajets: {
+                waypoints: []
+            }
         };
     },
     async mounted() {
         this.initMap();
-        this.initRoutingLayer();
 
         /** Chargement asynchrone des données depuis les json */
         await this.chargementCasernes().then((casernes) => {
@@ -127,7 +137,7 @@ export default {
                 .addTo(this.map);
         },
         initRoutingLayer() {
-            this.routingLayer = L.Routing.control({
+            const routingLayer = L.routing.control({
                 fitSelectedRoutes: false,
                 autoRoute: true,
                 routeWhileDragging: false,
@@ -153,36 +163,46 @@ export default {
                     extendToWaypoints: false,
                 },
                 show: true,
-                language: "fr"
+                language: "fr",
+                suppressDemoServerWarning: true,
             })
-
-            this.routingLayer.on("routeselected", this.onRouteSelectedEvent)
+            return routingLayer;
         },
         /**
          * @param {L.Routing.RouteSelectedEvent} e 
          */
-        onRouteSelectedEvent(e) {
+        onRouteSelectedEvent(e, caserne) {
             /** Envoie des ressources */
-            var camion = L.marker(e.route.coordinates[0], {
-                icon: this.icons.camion
-            }).addTo(this.map)
+            var camion = {
+                position: L.marker(e.route.coordinates[0], {
+                    icon: this.icons.camion
+                })
+            }
 
+            camion.position.addTo(this.map);
             e.route.coordinates.forEach((coord, index) => {
                 setTimeout(() => {
-                    camion.setLatLng([coord.lat, coord.lng])
+                    camion.position.setLatLng([coord.lat, coord.lng])
+                    if (camion.position.getLatLng().lat === e.route.coordinates[e.route.coordinates.length - 1].lat
+                        && camion.position.getLatLng().lng === e.route.coordinates[e.route.coordinates.length - 1].lng) {
+                        camion.position.setIcon(this.icons.camionEau)
+                    }
                 }, 150 * index)
             })
+            console.log(caserne)
         },
         async chargementCasernes() {
             const response = await fetch("./data/casernes.json");
             const casernes = await response.json();
             this.casernes = casernes;
+            this.$emit("update:casernes", casernes);
             return casernes;
         },
         async chargementFeux() {
             const response = await fetch("./data/feux.json");
             const feux = await response.json();
             this.feux = feux;
+            this.$emit("update:feux", feux);
             return feux;
         },
         initCasernes(casernes) {
@@ -191,12 +211,10 @@ export default {
 
             casernes.forEach((caserne) => {
                 const turfPoint = turf.point([caserne.latitude, caserne.longitude])
-                this.casernesFeatureCollection.features.push(turfPoint)
-
-                /** Création du marqueur */
-                const caserneMarqueur = L.marker([caserne.latitude, caserne.longitude], {
-                    icon: this.icons.caserne,
-                }).bindTooltip(`${caserne.nom}`)
+                if (caserne.disponibilite) {
+                    this.casernesFeatureCollection.features.push(turfPoint)
+                }
+                const caserneMarqueur = this.creationMarqueurCaserne(caserne, caserne.disponibilite);
 
                 /** Ajout du marqueur */
                 caserneMarqueur.addTo(this.map);
@@ -208,9 +226,9 @@ export default {
                     icon: this.initIconFeu()
                 })
 
-                /** On cherche la caserne la plus proche */
+                /** Recherche du chemin vers la caserne la plus proche */
                 marqueur.on("click", () => {
-                    this.trouverCaserneProche(marqueur.getLatLng())
+                    this.trouveCheminLePlusProche(marqueur.getLatLng())
                 })
 
                 marqueur.addTo(this.map)
@@ -224,20 +242,43 @@ export default {
                 iconSize: [tailleFeu, tailleFeu]
             })
         },
+        creationMarqueurCaserne(coordonnees, disponibilite) {
+            if (disponibilite) {
+                return L.marker([coordonnees.latitude, coordonnees.longitude], {
+                    icon: this.icons.caserne,
+                });
+            } else {
+                return L.marker([coordonnees.latitude, coordonnees.longitude], {
+                    icon: this.icons.caserneInactive,
+                });
+            }
+        },
         tailleAleatoireFeu(min, max) {
             return Math.round(Math.random() * (max - min)) + min;
         },
-        trouverCaserneProche(coordonnes) {
+        trouveCheminLePlusProche(coordonnes) {
             const turfPoint = turf.point([coordonnes.lat, coordonnes.lng]);
-            this.caserneLaPlusProche = turf.nearestPoint(turfPoint, this.casernesFeatureCollection)
+            try {
+                const caserneLaPlusProche = turf.nearestPoint(turfPoint, this.casernesFeatureCollection)
+                const waypoints = [
+                    L.latLng(caserneLaPlusProche.geometry.coordinates[0], caserneLaPlusProche.geometry.coordinates[1]),
+                    L.latLng(coordonnes.lat, coordonnes.lng)
+                ];
 
-            this.routingLayer.setWaypoints([
-                L.latLng(this.caserneLaPlusProche.geometry.coordinates[0],this.caserneLaPlusProche.geometry.coordinates[1]),
-                L.latLng(coordonnes.lat, coordonnes.lng)
-            ]);
-
-            this.routingLayer.route();
-            this.routingLayer.addTo(this.map);
+                const routingLayer = this.initRoutingLayer();
+                routingLayer.on("routeselected", (e) => {
+                    this.onRouteSelectedEvent(e, coordonnes)
+                })
+                this.ajouteRouteSurMap(routingLayer, waypoints)
+            } catch (error) {
+                console.warn(error)
+                console.warn("Aucune caserne à disponibilité")
+            }
+        },
+        ajouteRouteSurMap(routingLayer, waypoints) {
+            routingLayer.setWaypoints(waypoints);
+            routingLayer.route();
+            routingLayer.addTo(this.map)
         }
     }
 }
@@ -248,5 +289,4 @@ export default {
     width: 100%;
     height: 100%;
 }
-
 </style>
