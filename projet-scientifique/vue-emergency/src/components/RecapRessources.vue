@@ -15,11 +15,15 @@
             </li>
         </ul>
         <ul v-if="casernes.length !== 0" class="casernes-container">
+            <div>
+                <h2 v-if="casernes.length === 1">La caserne</h2>
+                <h2 v-else>Les casernes</h2>
+            </div>
             <li v-for="(caserne, index) in casernes" v-bind:key="index">
                 {{ caserne.nom }}
             </li>
         </ul>
-        <ul class="ressources-container">
+        <ul v-if="camions.length !== 0" class="ressources-container">
 
         </ul>
     </div>
@@ -44,10 +48,6 @@ export default {
         }
     },
     mounted() {
-        console.log(this.feux)
-        setTimeout(() => {
-            console.log(this.feux)
-        }, 6000)
     }
 }
 </script>

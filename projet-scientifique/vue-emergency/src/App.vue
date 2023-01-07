@@ -1,9 +1,9 @@
 <template>
   <div class="content">
-    <Map
+    <EmergencyApp
       id="map"
-      @update:casernes="onUpdateCasernes"
-      @update:feux="onUpdateFeux"
+      :casernes="casernes"
+      :feux="feux"
       @update:camions="onUpdateCamions"
     />
     <RecapRessources
@@ -16,13 +16,13 @@
 </template>
 
 <script>
-import Map from "./components/Map.vue";
+import EmergencyApp from "./components/EmergencyApp.vue";
 import RecapRessources from "./components/RecapRessources.vue";
 
 export default {
   name: "App",
   components: {
-    Map,
+    EmergencyApp,
     RecapRessources,
   },
   data() {
@@ -32,11 +32,19 @@ export default {
       camions: [],
     };
   },
+  async mounted() {
+    /** Chargement asynchrone des données depuis les json */
+    await Promise.all([this.chargementCasernes(), this.chargementFeux()]);
+  },
   methods: {
-    onUpdateCasernes(casernes) {
+    async chargementCasernes() {
+      const response = await fetch("./data/casernes.json");
+      const casernes = await response.json();
       this.casernes = casernes;
     },
-    onUpdateFeux(feux) {
+    async chargementFeux() {
+      const response = await fetch("./data/feux.json");
+      const feux = await response.json();
       this.feux = feux;
     },
     onUpdateCamions(camions) {

@@ -4,9 +4,9 @@ import App from './App.vue'
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
-import iconUrl from "leaflet/dist/images/marker-icon.png";
-import shadowUrl from "leaflet/dist/images/marker-shadow.png";
+import iconRetinaUrl from "../public/images/empty.png";
+import iconUrl from "../public/images/empty.png";
+import shadowUrl from "../public/images/empty.png";
 
 // Import du CSS de leaflet
 import "leaflet/dist/leaflet.css";
