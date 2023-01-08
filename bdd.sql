@@ -57,7 +57,7 @@ CREATE TABLE Capteur_Types(
 
 ALTER TABLE Flammes 
     ADD PRIMARY KEY (id),
-    ADD FOREIGN KEY (id_fire) REFERENCES Flammes(id);
+    ADD FOREIGN KEY (id_fire) REFERENCES Fires(id);
 
 ALTER TABLE Fires 
     ADD PRIMARY KEY (id);
