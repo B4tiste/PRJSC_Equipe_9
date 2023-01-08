@@ -1,6 +1,6 @@
 <template>
     <div class="ressources">
-        <ul v-if="feux.length !== 0" class="feux-container">
+        <ul v-if="urgences.length !== 0" class="feux-container">
             <div class="feux-title">
                 <img src="../../public/images/feu.png" alt="feu" style="height: 50px; width: 50px"> 
                 <span>{{feux.length}}</span>
@@ -14,12 +14,12 @@
                 {{ feu.longitude }}
             </li>
         </ul>
-        <ul v-if="casernes.length !== 0" class="casernes-container">
+        <ul v-if="centres.length !== 0" class="centres-container">
             <div>
-                <h2 v-if="casernes.length === 1">La caserne</h2>
-                <h2 v-else>Les casernes</h2>
+                <h2 v-if="centres.length === 1">La caserne</h2>
+                <h2 v-else>Les centres</h2>
             </div>
-            <li v-for="(caserne, index) in casernes" v-bind:key="index">
+            <li v-for="(caserne, index) in centres" v-bind:key="index">
                 {{ caserne.nom }}
             </li>
         </ul>
@@ -37,10 +37,10 @@ export default {
         }
     },
     props: {
-        casernes: {
+        centres: {
             type: Array
         },
-        feux: {
+        urgences: {
             type: Array
         },
         camions: {
@@ -64,7 +64,7 @@ export default {
 }
 
 .feux-container,
-.casernes-container,
+.centres-container,
 .ressources-container {
     width: 100%;
     height: calc(100% / 3);

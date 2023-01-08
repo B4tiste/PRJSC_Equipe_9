@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@turf/turf": "^6.5.0",
+    "axios": "^1.2.2",
     "core-js": "^3.6.5",
     "leaflet-routing-machine": "^3.2.12",
     "vue": "^3.0.0"
