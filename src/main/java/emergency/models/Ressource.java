@@ -1,9 +1,13 @@
 package emergency.models;
 
 import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.modelDto.RessourceComposanteDto;
+import emergency.modelDto.RessourceDto;
+import emergency.modelDto.VehiculeDto;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,13 +35,18 @@ public class Ressource implements IBaseModel  {
     @OneToMany(mappedBy = "ressource", cascade = CascadeType.ALL)
     private List<RessourceComposante> ressourceComposantes;
 
+    @OneToMany(mappedBy = "ressource", cascade = CascadeType.ALL)
+    private List<Vehicule> vehicules;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_CENTRE")
     private Centre centre;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "ID_URGENCE")
     private Urgence urgence;
+
+
 
     public Ressource() {
     }
@@ -100,6 +109,14 @@ public class Ressource implements IBaseModel  {
         this.centre = centre;
     }
 
+    public Urgence getUrgence() {
+        return urgence;
+    }
+
+    public void setUrgence(Urgence urgence) {
+        this.urgence = urgence;
+    }
+
     @Override
     public String toString() {
         return "TypeRessource{" +
@@ -108,6 +125,147 @@ public class Ressource implements IBaseModel  {
                 ", type=" + type +
                 ", statut=" + statut +
                 '}';
+    }
+
+    public List<Vehicule> getVehicules() {
+        return vehicules;
+    }
+
+    public void setVehicules(List<Vehicule> vehicules) {
+        this.vehicules = vehicules;
+    }
+
+    public RessourceDto toDto(Boolean onlyId)
+    {
+        RessourceDto dest = new RessourceDto();
+
+        if(this.getRessourceComposantes()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    List<Long> ids = new ArrayList<>();
+                    for(RessourceComposante ressourceComposante:this.getRessourceComposantes())
+                    {
+                        ids.add(ressourceComposante.getId());
+                    }
+                    dest.setRessourceComposanteId(ids);
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    List<RessourceComposante> ressourceComposantes = this.getRessourceComposantes();
+                    List<RessourceComposanteDto> ressourceComposantesDto = new ArrayList<>();
+                    for(RessourceComposante ressourceComposante:ressourceComposantes)
+                    {
+                        ressourceComposantesDto.add(ressourceComposante.toDto(onlyId));
+                    }
+                    dest.setRessourceComposante(ressourceComposantesDto);
+                    List<Long> ids = new ArrayList<>();
+                    for(RessourceComposante ressourceComposante:this.getRessourceComposantes())
+                    {
+                        ids.add(ressourceComposante.getId());
+                    }
+                    dest.setRessourceComposanteId(ids);
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if(this.getVehicules()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    List<Long> ids = new ArrayList<>();
+                    for(Vehicule ressourceComposante:this.getVehicules())
+                    {
+                        ids.add(ressourceComposante.getId());
+                    }
+                    dest.setVehiculesId(ids);
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    List<Vehicule> ressourceComposantes = this.getVehicules();
+                    List<VehiculeDto> ressourceComposantesDto = new ArrayList<>();
+                    for(Vehicule ressourceComposante:ressourceComposantes)
+                    {
+                        ressourceComposantesDto.add(ressourceComposante.toDto(onlyId));
+                    }
+                    dest.setVehicules(ressourceComposantesDto);
+                    List<Long> ids = new ArrayList<>();
+                    for(Vehicule ressourceComposante:this.getVehicules())
+                    {
+                        ids.add(ressourceComposante.getId());
+                    }
+                    dest.setVehiculesId(ids);
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if(this.getStatut()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    dest.setStatutId(Long.valueOf(this.getStatut().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    dest.setStatut(this.getStatut().toDto(onlyId));
+                    dest.setStatutId(Long.valueOf(this.getStatut().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if(this.getType()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    dest.setTypeRessourceId(Long.valueOf(this.getType().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    dest.setTypeRessource(this.getType().toDto(onlyId));
+                    dest.setTypeRessourceId(Long.valueOf(this.getType().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        dest.setId(this.getId());
+        try {
+            dest.setNom(this.getNom());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
     public Ressource Save(ServiceDefinitions ref, Boolean cascade) {

@@ -2,6 +2,7 @@ package emergency.models;
 
 import emergency.baseReferentiel.ReferentielDefinitions;
 import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.modelDto.AdresseDto;
 import emergency.models.sensorRelated.Capteur;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
@@ -91,6 +92,38 @@ public class Adresse implements IBaseModel  {
 
     public void setPays(String pays) {
         this.pays = pays;
+    }
+
+    public AdresseDto toDto(Boolean onlyId)
+    {
+        AdresseDto dest = new AdresseDto();
+        dest.setId(this.getId());
+        try {
+            dest.setRue(this.getRue());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setVille(this.getVille());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setEtat(this.getEtat());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setCodePostal(this.getCodePostal());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setPays(this.getPays());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
     public Adresse Save(ServiceDefinitions ref, Boolean cascade)

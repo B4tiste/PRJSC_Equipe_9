@@ -2,6 +2,7 @@ package emergency.models.sensorRelated;
 
 
 import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.modelDto.sensorRelated.EtatDto;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
 
@@ -22,7 +23,7 @@ public class Etat implements IBaseModel {
     @Column(name = "NOM")
     private String nom;
 
-    @OneToMany(mappedBy = "etat", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "etat")
     private List<Microcontroller> microcontrollers;
 
     public Etat() {
@@ -77,6 +78,23 @@ public class Etat implements IBaseModel {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public EtatDto toDto(Boolean onlyId)
+    {
+        EtatDto dest = new EtatDto();
+        dest.setId(this.getId());
+        try {
+            dest.setNom(this.getNom());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setValue(this.getValeur());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
     @Override

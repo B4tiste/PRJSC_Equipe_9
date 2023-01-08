@@ -2,8 +2,11 @@ package emergency.models.sensorRelated;
 
 import emergency.baseReferentiel.ServiceDefinitions;
 import emergency.interfacesDefinition.IBaseModel;
+import emergency.modelDto.sensorRelated.CapteurDto;
+import emergency.modelDto.sensorRelated.MicrocontrollerDto;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,10 +19,10 @@ public class Microcontroller implements IBaseModel {
     private Long id;
 
     @Column(name = "LATITUDE")
-    private Float latitude;
+    private Double latitude;
 
     @Column(name = "LONGITUDE")
-    private Float longitude;
+    private Double longitude;
 
     @Column(name = "NOM")
     private String nom;
@@ -34,7 +37,7 @@ public class Microcontroller implements IBaseModel {
     public Microcontroller() {
     }
 
-    public Microcontroller(Float latitude, Float longitude, String nom, Etat etat, List<Capteur> capteurs) {
+    public Microcontroller(Double latitude, Double longitude, String nom, Etat etat, List<Capteur> capteurs) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.nom = nom;
@@ -50,19 +53,19 @@ public class Microcontroller implements IBaseModel {
         this.id = id;
     }
 
-    public Float getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(Float latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
-    public Float getLongitude() {
+    public Double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(Float longitude) {
+    public void setLongitude(Double longitude) {
         this.longitude = longitude;
     }
 
@@ -93,25 +96,101 @@ public class Microcontroller implements IBaseModel {
     public Microcontroller Save(ServiceDefinitions ref, Boolean cascade) {
         Microcontroller mc;
         try {
+            mc = (Microcontroller)ref.getMicrocontrollerService().CreateOrUpdateOrGet(this);
 
             if (cascade == Boolean.TRUE) {
 
                 List<Capteur> capteurs = getCapteurs();
                 for (int c = 0; c < capteurs.size(); c++) {
                     Capteur capteur = capteurs.get(c);
+                    capteur.setMicrocontroller(mc);
                     Capteur savedCapteur = capteur.Save(ref, cascade);
                     if (savedCapteur != null) {
                         capteurs.set(c, savedCapteur);
                     }
                     setCapteurs(capteurs);
                 }
+                mc.setCapteurs(capteurs);
             }
-            mc = (Microcontroller)ref.getMicrocontrollerService().CreateOrUpdateOrGet(this);
             return mc;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public MicrocontrollerDto toDto(Boolean onlyId)
+    {
+        MicrocontrollerDto dest = new MicrocontrollerDto();
+        if(this.getCapteurs()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    List<Long> ids = new ArrayList<>();
+                    for(Capteur capteur:this.getCapteurs())
+                    {
+                        ids.add(capteur.getId());
+                    }
+                    dest.setCapteursId(ids);
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    List<Capteur> capteurs = this.getCapteurs();
+                    List<CapteurDto> capteursDto = new ArrayList<>();
+                    for(Capteur capteur:capteurs)
+                    {
+                        capteursDto.add(capteur.toDto(onlyId));
+                    }
+                    dest.setCapteurs(capteursDto);
+                    List<Long> ids = new ArrayList<>();
+                    for(Capteur capteur:this.getCapteurs())
+                    {
+                        ids.add(capteur.getId());
+                    }
+                    dest.setCapteursId(ids);
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if(this.getEtat()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    dest.setEtatId(Long.valueOf(this.getEtat().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    dest.setEtat(this.getEtat().toDto(onlyId));
+                    dest.setEtatId(Long.valueOf(this.getEtat().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        dest.setId(this.getId());
+        try {
+            dest.setLatitude(this.getLatitude());
+            dest.setLongitude(this.getLongitude());
+            dest.setNom(this.getNom());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
     @Override

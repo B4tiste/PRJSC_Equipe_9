@@ -1,8 +1,11 @@
 package emergency.models;
 
 import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.modelDto.CentreDto;
+import emergency.modelDto.RessourceDto;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,7 +32,7 @@ public class Centre implements IBaseModel  {
     @Column(name = "LONGITUDE")
     private Double longitude;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "ID_ADRESSE")
     private Adresse adresse;
 
@@ -130,6 +133,93 @@ public class Centre implements IBaseModel  {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public CentreDto toDto(Boolean onlyId)
+    {
+        CentreDto dest = new CentreDto();
+        if(this.getAdresse()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    dest.setAdresseId(this.getAdresse().getId());
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    dest.setAdresse(this.getAdresse().toDto(onlyId));
+                    dest.setAdresseId(this.getAdresse().getId());
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if(this.getRessource()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    List<Long> ids = new ArrayList<>();
+                    for(Ressource ressource:this.getRessource())
+                    {
+                        ids.add(ressource.getId());
+                    }
+                    dest.setRessourceId(ids);
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    List<Ressource> ressources = this.getRessource();
+                    List<RessourceDto> ressourcesDto = new ArrayList<>();
+                    for(Ressource ressource:ressources)
+                    {
+                        ressourcesDto.add(ressource.toDto(onlyId));
+                    }
+                    dest.setRessource(ressourcesDto);
+                    List<Long> ids = new ArrayList<>();
+                    for(Ressource ressource:this.getRessource())
+                    {
+                        ids.add(ressource.getId());
+                    }
+                    dest.setRessourceId(ids);
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        dest.setId(this.getId());
+        try {
+            dest.setNom(this.getNom());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setAvailable(this.getAvailable());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setLatitude(this.getLatitude());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setLongitude(this.getLongitude());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
 

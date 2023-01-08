@@ -2,6 +2,7 @@ package emergency.models.sensorRelated;
 
 
 import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.modelDto.sensorRelated.CapteurTypeDto;
 import emergency.models.Adresse;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
@@ -55,6 +56,23 @@ public class CapteurType implements IBaseModel {
 
     public void setValeur(int valeur) {
         this.valeur = valeur;
+    }
+
+    public CapteurTypeDto toDto(Boolean onlyId)
+    {
+        CapteurTypeDto dest = new CapteurTypeDto();
+        dest.setId(this.getId());
+        try {
+            dest.setType(this.getType());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setValue(this.getValeur());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
     public CapteurType Save(ServiceDefinitions ref, Boolean cascade) {

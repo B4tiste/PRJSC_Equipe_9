@@ -1,6 +1,7 @@
 package emergency.models;
 
 import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.modelDto.TypeRessourceDto;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
 
@@ -63,6 +64,23 @@ public class TypeRessource implements IBaseModel  {
 
     public void setRessources(Set<Ressource> ressources) {
         this.ressources = ressources;
+    }
+
+    public TypeRessourceDto toDto(Boolean onlyId)
+    {
+        TypeRessourceDto dest = new TypeRessourceDto();
+        dest.setId(this.getId());
+        try {
+            dest.setNom(this.getType());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setValeur(this.getValeur());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
     public TypeRessource Save(ServiceDefinitions ref, Boolean cascade)

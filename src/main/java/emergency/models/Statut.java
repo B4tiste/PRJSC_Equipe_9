@@ -1,6 +1,7 @@
 package emergency.models;
 
 import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.modelDto.StatutDto;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
 
@@ -23,7 +24,7 @@ public class Statut implements IBaseModel  {
     private int valeur;
 
 
-    @OneToMany(mappedBy = "statut", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "statut")
     private Set<Urgence> ressources;
 
 
@@ -79,6 +80,24 @@ public class Statut implements IBaseModel  {
 
         }
         return null;
+    }
+
+    public StatutDto toDto(Boolean onlyId)
+    {
+        StatutDto dest = new StatutDto();
+
+        dest.setId(this.getId());
+        try {
+            dest.setNom(this.getNom());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setValeur(this.getValeur());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
     @Override

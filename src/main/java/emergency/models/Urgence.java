@@ -2,9 +2,14 @@ package emergency.models;
 
 
 import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.modelDto.RessourceDto;
+import emergency.modelDto.UrgenceDto;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
+import org.jetbrains.annotations.NotNull;
+
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,8 +31,11 @@ public class Urgence implements IBaseModel  {
     @Column(name = "TITRE")
     private String titre;
 
-    @ManyToOne
-    @JoinColumn(name = "ID_INCIDENT")
+
+    /*@OneToOne(optional = false, cascade = CascadeType.ALL, mappedBy = "urgence")
+    @JoinColumn(name = "ID_INCIDENT", unique = true, nullable = false)
+    @NotNull*/
+    @OneToOne(mappedBy = "urgence", cascade = CascadeType.ALL)
     private Incident incident;
 
     @ManyToOne
@@ -118,6 +126,133 @@ public class Urgence implements IBaseModel  {
 
     public void setRessources(List<Ressource> ressources) {
         this.ressources = ressources;
+    }
+
+
+    public UrgenceDto toDto(Boolean onlyId)
+    {
+        UrgenceDto dest = new UrgenceDto();
+        if(this.getIncident()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    dest.setIncidentId(this.getIncident().getId());
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    dest.setIncident(this.getIncident().toDto(onlyId));
+                    dest.setIncidentId(this.getIncident().getId());
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if(this.getRessources()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    List<Long> ids = new ArrayList<>();
+                    for(Ressource ressource:this.getRessources())
+                    {
+                        ids.add(ressource.getId());
+                    }
+                    dest.setRessourcesId(ids);
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    List<Ressource> ressources = this.getRessources();
+                    List<RessourceDto> ressourcesDto = new ArrayList<>();
+                    for(Ressource ressource:ressources)
+                    {
+                        ressourcesDto.add(ressource.toDto(onlyId));
+                    }
+                    dest.setRessources(ressourcesDto);
+                    List<Long> ids = new ArrayList<>();
+                    for(Ressource ressource:this.getRessources())
+                    {
+                        ids.add(ressource.getId());
+                    }
+                    dest.setRessourcesId(ids);
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if(this.getStatut()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    dest.setStatutId(Long.valueOf(this.getStatut().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    dest.setStatut(this.getStatut().toDto(onlyId));
+                    dest.setStatutId(Long.valueOf(this.getStatut().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if(this.getType()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    dest.setTypeId(Long.valueOf(this.getType().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    dest.setType(this.getType().toDto(onlyId));
+                    dest.setTypeId(Long.valueOf(this.getType().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        dest.setId(this.getId());
+        try {
+            dest.setDateCreation(this.getDateCreation());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setDateUpdate(this.getDateUpdate());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setTitre(this.getTitre());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
     public Urgence Save(ServiceDefinitions ref, Boolean cascade) {

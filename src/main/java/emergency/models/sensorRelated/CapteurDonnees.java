@@ -3,6 +3,7 @@ package emergency.models.sensorRelated;
 
 import emergency.baseReferentiel.ServiceDefinitions;
 import emergency.interfacesDefinition.IBaseModel;
+import emergency.modelDto.sensorRelated.CapteurDonneesDto;
 import emergency.models.Adresse;
 import jakarta.persistence.*;
 
@@ -106,6 +107,24 @@ public class CapteurDonnees implements IBaseModel {
 
     public void setDateUpdate(Date dateUpdate) {
         this.dateUpdate = dateUpdate;
+    }
+
+    public CapteurDonneesDto toDto(Boolean onlyId)
+    {
+        CapteurDonneesDto dest = new CapteurDonneesDto();
+
+        dest.setId(this.getId());
+        try {
+            dest.setIdentifier(this.getIdentifier());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setValeur(this.getValeur());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
     @Override

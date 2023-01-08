@@ -25,6 +25,12 @@ public class InternalSetupController extends emergency.controllers.BaseControlle
     @Autowired
     public ServiceDefinitions services;
 
+    public InternalSetupController(ServiceDefinitions services)
+    {
+        ReferentielDefinitions.serviceDefinitions = services;
+        this.services = services;
+    }
+
     @PostMapping("/Setup")
     public ResponseEntity<Boolean> Setup(
             @RequestBody String key
@@ -35,6 +41,20 @@ public class InternalSetupController extends emergency.controllers.BaseControlle
         // donné que un setup ne doit pas être systématiquement lancé.
         if(key.equals("da39a3ee5e6b4b0d3255bfef95601890afd80709"))
         {
+
+            // On nettoie avant tout la base de données
+            this.services.getCentreService().DeleteAll();
+            this.services.getUrgenceService().DeleteAll();
+            this.services.getIncidentService().DeleteAll();
+
+            this.services.getAdresseService().DeleteAll();
+            this.services.getRessourceComposanteService().DeleteAll();
+            this.services.getRessourceService().DeleteAll();
+            this.services.getPersonneService().DeleteAll();
+            this.services.getCapteurService().DeleteAll();
+            this.services.getMicrocontrollerService().DeleteAll();
+            this.services.getCapteurDonneesService().DeleteAll();
+
 
             try{
                 //PHASE 1 - ENUM - PRIORITE
@@ -136,20 +156,26 @@ public class InternalSetupController extends emergency.controllers.BaseControlle
 
                 //PHASE 8 - Generation des centres
 
-                // On nettoie avant tout la base de données
-                this.services.getCentreService().DeleteAll();
-                this.services.getAdresseService().DeleteAll();
-                this.services.getRessourceComposanteService().DeleteAll();
-                this.services.getRessourceService().DeleteAll();
-                this.services.getPersonneService().DeleteAll();
+
+
 
                 var centers = TestDataA.getCentres();
 
                 for(var centre: centers)
                 {
-                    centre.Save(this.services, Boolean.TRUE);
+                    centre.Save(this.services, Boolean.FALSE);
                 }
 
+
+                //PHASE 9 - Génération des capteurs
+
+
+                var micros = TestDataA.getMicrocontroller("");
+
+                for(var micro: micros)
+                {
+                    micro.Save(this.services, Boolean.FALSE);
+                }
 
 
 
@@ -163,6 +189,31 @@ public class InternalSetupController extends emergency.controllers.BaseControlle
             }
         }
         return (new ResponseEntity<Boolean>(Boolean.FALSE,HttpStatus.UNAUTHORIZED));
+    }
+
+
+    @PostMapping("/SampleUrgence")
+    public ResponseEntity<Boolean> SampleUrgence(
+            @RequestBody String key
+    ) {
+        try {
+            // Création Urgence Test qui retire toutes les autres urgences
+            if (key.equals("da39a3ee5e6b4b0d3255bfef95601890afd80709")) {
+                this.services.getUrgenceService().DeleteAll();
+                this.services.getIncidentService().DeleteAll();
+
+                var test_urgences =  TestDataA.getUrgence();
+                for(Urgence urgence: test_urgences)
+                {
+                    urgence.Save(this.services, Boolean.FALSE);
+                }
+                return (new ResponseEntity<Boolean>(Boolean.TRUE, HttpStatus.OK)) ;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return (new ResponseEntity<Boolean>(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR)) ;
+        }
+        return (new ResponseEntity<Boolean>(Boolean.FALSE, HttpStatus.INTERNAL_SERVER_ERROR)) ;
     }
 
 }

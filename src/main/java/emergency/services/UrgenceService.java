@@ -1,31 +1,48 @@
 package emergency.services;
 
+import emergency.baseReferentiel.ReferentielDefinitions;
+import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.enumDefinition.STATUT_RESSOURCE;
+import emergency.modelDto.UrgenceDto;
 import emergency.models.*;
+import emergency.repositories.UrgenceRepository;
+import emergency.repositories.type.TypeRessourceRepository;
 import emergency.services.referentiel.AdresseService;
 import emergency.services.referentiel.PrioriteService;
 import emergency.services.referentiel.StatutService;
 import emergency.services.type.TypeRessourceService;
 import emergency.services.type.TypeUrgenceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Optional;
 
 @Service
 public class UrgenceService extends BaseService {
 
-    public UrgenceService(TypeRessourceService typeRessourceService, TypeUrgenceService typeUrgenceService, IncidentService incidentService, AdresseService adresseService, PrioriteService prioriteService, StatutService statutService) {
+    public final int VEHICULE_RES = 5;
+    public UrgenceService(UrgenceRepository urgenceRepository, VehicleService vehicleService, TypeRessourceService typeRessourceService, TypeUrgenceService typeUrgenceService, IncidentService incidentService, AdresseService adresseService, PrioriteService prioriteService, StatutService statutService) {
         this.typeRessourceService = typeRessourceService;
         this.typeUrgenceService = typeUrgenceService;
         this.incidentService = incidentService;
         this.adresseService = adresseService;
         this.prioriteService = prioriteService;
         this.statutService = statutService;
-
+        this.baseRepository = urgenceRepository;
+        this.urgenceRepository = urgenceRepository;
+        this.vehicleService = vehicleService;
     }
 
     @Autowired
     public TypeRessourceService typeRessourceService;
+    @Autowired
+    public VehicleService vehicleService;
     @Autowired
     public TypeUrgenceService typeUrgenceService;
     @Autowired
@@ -36,9 +53,22 @@ public class UrgenceService extends BaseService {
     public PrioriteService prioriteService;
     @Autowired
     public StatutService statutService;
+    @Autowired
+    public UrgenceRepository urgenceRepository;
 
 
 
+    public int getNumResources(double radius) {
+        double radiusInMeters = radius * 1000;
+        double area = Math.PI * radiusInMeters * radiusInMeters;
+        int nbResources = (int) Math.ceil(area / 100);
+
+        if(nbResources<1)
+        {
+            nbResources = 1;
+        }
+        return nbResources;
+    }
 
     /* Creer une urgence avec un incident par défaut*/
     public Urgence CreateUrgence(
@@ -174,5 +204,138 @@ public class UrgenceService extends BaseService {
         }
     }
 
+
+    public Urgence FillFireUrgency(
+            Urgence urgence
+    )
+    {
+        try {
+            var urgence_get = (Urgence)this.CreateOrUpdateOrGet(urgence);
+
+
+            if(urgence_get.getIncident()!=null)
+            {
+                var rad = urgence_get.getIncident().getRadius();
+                int nb_ressources = getNumResources(rad);
+                int filled_res = nb_ressources;
+
+                if(urgence_get.getRessources()!=null)
+                {
+                    for(var res : urgence_get.getRessources())
+                    {
+                        var veh = res.getVehicules();
+                        if(veh != null)
+                        {
+                            for(var vehicule : veh)
+                            {
+                                int nb_pers = 0;
+                                if(vehicule.getPersonnes()!=null)
+                                {
+                                    nb_pers = vehicule.getPersonnes().size();
+                                }
+
+                                int nv = VEHICULE_RES + nb_pers;
+
+                                filled_res = filled_res - nv;
+                                if(filled_res+nv<=0)
+                                {
+                                    filled_res = filled_res + nv;
+                                    var centre = vehicule.getCentre();
+
+                                    var res_c = centre.getRessource();
+                                    if(res_c != null)
+                                    {
+                                        if(res_c.size()>0)
+                                        {
+                                            vehicule.getRessource().getVehicules().remove(vehicule);
+
+                                            vehicule.setRessource(res_c.get(0));
+                                            vehicule.setStatut(
+                                                    ReferentielDefinitions.getStatut(STATUT_RESSOURCE.En_DEPLACEMENT_RETOUR.name())
+                                            );
+                                            res_c.get(0).getVehicules().add(vehicule);
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+
+                Boolean filled = Boolean.FALSE;
+                int n = 0;
+                while(filled == Boolean.FALSE)
+                {
+                    if(filled_res<=0)
+                    {
+                        filled = Boolean.TRUE;
+                        break;
+                    }
+                    org.springframework.data.domain.Pageable pageable = PageRequest.of(n, 2);
+                    var vehicules = this.vehicleService.FindVehicules(
+                            urgence_get.getIncident().getLongitude(),
+                            urgence_get.getIncident().getLatitude(),
+                            pageable
+                    );
+                    if(vehicules.size()>0)
+                    {
+                        for(var vehicle : vehicules)
+                        {
+                            if(vehicle.isAvailable()==Boolean.TRUE)
+                            {
+                                int nb_pers = 0;
+                                if(vehicle.getPersonnes()!=null)
+                                {
+                                    nb_pers = vehicle.getPersonnes().size();
+                                }
+
+                                int nv = VEHICULE_RES + nb_pers;
+                                filled_res = filled_res - nv;
+
+                                var res = urgence_get.getRessources();
+                                if(res != null)
+                                {
+                                    if(res.size()>0)
+                                    {
+                                        var vehicules_ur = res.get(0).getVehicules();
+
+                                        vehicle.setStatut(
+                                                ReferentielDefinitions.getStatut(STATUT_RESSOURCE.EN_DEPLACEMENT_ALLER.name())
+                                        );
+
+                                        vehicle.setAvailable(Boolean.FALSE);
+                                        res.get(0).getVehicules().remove(vehicle);
+                                        vehicle.setRessource(res.get(0));
+                                        vehicules_ur.add(vehicle);
+                                        res.get(0).setVehicules(vehicules_ur);
+
+                                    }
+                                }
+                                if(filled_res<=0)
+                                {
+                                    filled = Boolean.TRUE;
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        return null;
+                    }
+                    n++;
+                }
+
+
+
+            }
+            return urgence_get;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }

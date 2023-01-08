@@ -1,6 +1,7 @@
 package emergency.models;
 
 import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.modelDto.PersonneDto;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
 
@@ -77,6 +78,45 @@ public class Personne implements IBaseModel  {
 
     public void setRessourceComposante(RessourceComposante ressourceComposante) {
         this.ressourceComposante = ressourceComposante;
+    }
+
+    public PersonneDto toDto(Boolean onlyId)
+    {
+        PersonneDto dest = new PersonneDto();
+        if(this.getRole()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    dest.setRoleId(Long.valueOf(this.getRole().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    dest.setRole(this.getRole().toDto(onlyId));
+                    dest.setRoleId(Long.valueOf(this.getRole().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        dest.setId(this.getId());
+        try {
+            dest.setNom(this.getNom());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setPrenom(this.getPrenom());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
     public Personne Save(ServiceDefinitions ref, Boolean cascade)

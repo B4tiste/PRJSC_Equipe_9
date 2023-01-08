@@ -1,12 +1,14 @@
 package emergency.models;
 
 import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.modelDto.IncidentDto;
 import jakarta.persistence.*;
 import java.sql.Date;
 import java.util.List;
 import java.util.Objects;
 
 import emergency.interfacesDefinition.*;
+import org.jetbrains.annotations.NotNull;
 
 @Entity
 @Table(name = "INCIDENT")
@@ -27,15 +29,18 @@ public class Incident implements IBaseModel  {
     private Date dateUpdate;
 
     @Column(name = "LATITUDE")
-    private double latitude;
+    private Double latitude;
 
     @Column(name = "LONGITUDE")
-    private double longitude;
+    private Double longitude;
+
+    @Column(name = "RADIUS")
+    private Double radius;
 
     @Column(name = "DESCRIPTION_INCIDENT")
     private String descriptionIncident;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "ID_ADRESSE")
     private Adresse adresse;
 
@@ -43,8 +48,14 @@ public class Incident implements IBaseModel  {
     @JoinColumn(name = "ID_PRIORITE")
     private Priorite priorite;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID_URGENCE")
+    //@JoinColumn(name = "ID_URGENCE")
+
+
+    /*@JoinColumn(name = "ID_URGENCE")
+    @NotNull*/
+
+    @OneToOne
+    @JoinColumn(name = "id_urgence")
     private Urgence urgence;
 
     public Incident() {
@@ -93,11 +104,11 @@ public class Incident implements IBaseModel  {
         this.dateUpdate = dateUpdate;
     }
 
-    public double getLatitude() {
+    public Double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
+    public void setLatitude(Double latitude) {
         this.latitude = latitude;
     }
 
@@ -133,6 +144,108 @@ public class Incident implements IBaseModel  {
         this.priorite = priorite;
     }
 
+    public Urgence getUrgence() {
+        return urgence;
+    }
+
+    public void setUrgence(Urgence urgence) {
+        this.urgence = urgence;
+    }
+
+    public Double getRadius() {
+        return radius;
+    }
+
+    public void setRadius(Double radius) {
+        this.radius = radius;
+    }
+
+
+    public IncidentDto toDto(Boolean onlyId)
+    {
+        IncidentDto dest = new IncidentDto();
+        if(this.getAdresse()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    dest.setAdresseId(this.getAdresse().getId());
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    dest.setAdresse(this.getAdresse().toDto(onlyId));
+                    dest.setAdresseId(this.getAdresse().getId());
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if(this.getPriorite()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    dest.setPrioriteId(this.getPriorite().getId());
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    dest.setPriorite(this.getPriorite().toDto(onlyId));
+                    dest.setPrioriteId(this.getPriorite().getId());
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        dest.setId(this.getId());
+        try {
+            dest.setNom(this.getNom());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setDateCreation(this.getDateCreation());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setDateUpdate(this.getDateUpdate());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setRadius(this.getRadius());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setLatitude(this.getLatitude());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setLongitude(this.getLongitude());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setDescriptionIncident(this.getDescriptionIncident());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
+    }
 
     public Incident Save(ServiceDefinitions ref, Boolean cascade) {
         Incident addr;
@@ -163,6 +276,7 @@ public class Incident implements IBaseModel  {
                 ", descriptionIncident='" + descriptionIncident + '\'' +
                 ", adresse=" + adresse +
                 ", priorite=" + priorite +
+                ", radius=" + radius +
                 '}';
     }
 
@@ -171,11 +285,12 @@ public class Incident implements IBaseModel  {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Incident incident = (Incident) o;
-        return Double.compare(incident.latitude, latitude) == 0 && Double.compare(incident.longitude, longitude) == 0 && Objects.equals(nom, incident.nom) && Objects.equals(dateCreation, incident.dateCreation) && Objects.equals(dateUpdate, incident.dateUpdate) && Objects.equals(descriptionIncident, incident.descriptionIncident) && Objects.equals(adresse, incident.adresse) && Objects.equals(priorite, incident.priorite);
+        return Double.compare(incident.latitude, latitude) == 0 && Double.compare(incident.longitude, longitude) == 0 && Objects.equals(nom, incident.nom) && Objects.equals(dateCreation, incident.dateCreation) && Objects.equals(dateUpdate, incident.dateUpdate) && Objects.equals(descriptionIncident, incident.descriptionIncident) && Objects.equals(adresse, incident.adresse) && Objects.equals(priorite, incident.priorite) && Objects.equals(radius, incident.radius);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nom, dateCreation, dateUpdate, latitude, longitude, descriptionIncident, adresse, priorite);
+        return Objects.hash(nom, dateCreation, dateUpdate, latitude, longitude, descriptionIncident, adresse, priorite, radius);
     }
 }
+

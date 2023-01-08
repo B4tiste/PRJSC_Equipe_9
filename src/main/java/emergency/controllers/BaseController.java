@@ -1,5 +1,7 @@
 package emergency.controllers;
 
+import emergency.baseReferentiel.ReferentielDefinitions;
+import emergency.baseReferentiel.ServiceDefinitions;
 import emergency.mapper.BaseMapper;
 import emergency.interfacesDefinition.IBaseModel;
 import emergency.interfacesDefinition.IBaseModelDto;
@@ -18,6 +20,14 @@ import java.util.List;
 
 @Controller
 public class BaseController {
+
+    @Autowired
+    public ServiceDefinitions serviceDefinitions;
+
+    public BaseController()
+    {
+        ReferentielDefinitions.serviceDefinitions = serviceDefinitions;
+    }
 
 
     private IBaseService service;

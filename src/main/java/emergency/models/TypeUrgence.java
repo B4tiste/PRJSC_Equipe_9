@@ -2,6 +2,7 @@ package emergency.models;
 
 import emergency.baseReferentiel.ServiceDefinitions;
 import emergency.interfacesDefinition.IBaseModel;
+import emergency.modelDto.TypeUrgenceDto;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -63,6 +64,23 @@ public class TypeUrgence implements IBaseModel {
 
     public void setUrgences(Set<Urgence> urgences) {
         this.urgences = urgences;
+    }
+
+    public TypeUrgenceDto toDto(Boolean onlyId)
+    {
+        TypeUrgenceDto dest = new TypeUrgenceDto();
+        dest.setId(this.getId());
+        try {
+            dest.setNom(this.getNom());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setValeur(this.getValeur());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
     public TypeUrgence Save(ServiceDefinitions ref, Boolean cascade)

@@ -1,6 +1,7 @@
 package emergency.models;
 
 import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.modelDto.RoleDto;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
 
@@ -23,8 +24,8 @@ public class Role implements IBaseModel  {
     private Long valeur;
 
 
-    @OneToMany(mappedBy = "role")
-    private Set<Personne> personnes;
+    /*@OneToMany(mappedBy = "role")
+    private Set<Personne> personnes;*/
 
     public Role() {
     }
@@ -58,12 +59,30 @@ public class Role implements IBaseModel  {
         this.valeur = valeur;
     }
 
-    public Set<Personne> getPersonnes() {
+    /*public Set<Personne> getPersonnes() {
         return personnes;
     }
 
     public void setPersonnes(Set<Personne> personnes) {
         this.personnes = personnes;
+    }*/
+
+    public RoleDto toDto(Boolean onlyId)
+    {
+        RoleDto dest = new RoleDto();
+
+        dest.setId(this.getId());
+        try {
+            dest.setNom(this.getNom());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setValeur(this.getValeur());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
     public Role Save(ServiceDefinitions ref, Boolean cascade)
@@ -85,11 +104,11 @@ public class Role implements IBaseModel  {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Role role = (Role) o;
-        return Objects.equals(nom, role.nom) && Objects.equals(valeur, role.valeur) && Objects.equals(personnes, role.personnes);
+        return Objects.equals(nom, role.nom) && Objects.equals(valeur, role.valeur);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(nom, valeur, personnes);
+        return Objects.hash(nom, valeur);
     }
 }

@@ -64,7 +64,7 @@ public class BaseMapper {
     public void InitMapRules()
     {
         this.mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-        this.mapper.createTypeMap(UrgenceDto.class, Urgence.class)
+        /*this.mapper.createTypeMap(UrgenceDto.class, Urgence.class)
                 .addMappings(mapper->mapper.using(ctx->{
                     Long id = (Long)ctx.getSource();
                     return id != null ? _repDef.getIncidentRepository().findById(id).orElse(null) : null;
@@ -122,7 +122,7 @@ public class BaseMapper {
                 .addMappings(mapper->mapper.using(ctx->{
                     Long id = (Long)ctx.getSource();
                     return id != null ? _repDef.getPrioriteRepository().findById(id).orElse(null) : null;
-                }).map(IncidentDto::getPrioriteDto, Incident::setPriorite));
+                }).map(IncidentDto::getPrioriteDto, Incident::setPriorite));*/
 
     }
 

@@ -1,6 +1,7 @@
 package emergency.models;
 
 import emergency.baseReferentiel.ServiceDefinitions;
+import emergency.modelDto.PrioriteDto;
 import jakarta.persistence.*;
 import emergency.interfacesDefinition.*;
 
@@ -63,6 +64,23 @@ public class Priorite implements IBaseModel  {
 
     public void setIncidents(Set<Incident> incidents) {
         this.incidents = incidents;
+    }
+
+    public PrioriteDto toDto(Boolean onlyId)
+    {
+        PrioriteDto dest = new PrioriteDto();
+        dest.setId(this.getId());
+        try {
+            dest.setNom(this.getNom());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dest.setValeur(this.getValeur());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dest;
     }
 
     public Priorite Save(ServiceDefinitions ref, Boolean cascade)
