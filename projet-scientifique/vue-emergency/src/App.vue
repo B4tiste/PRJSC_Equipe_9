@@ -2,14 +2,14 @@
   <div class="content">
     <EmergencyApp
       id="map"
-      :casernes="casernes"
-      :feux="feux"
+      :centres="centres"
+      :urgences="urgences"
       @update:camions="onUpdateCamions"
     />
     <RecapRessources
       id="recapRessources"
-      :casernes="casernes"
-      :feux="feux"
+      :centres="centres"
+      :urgences="urgences"
       :camions="camions"
     />
   </div>
@@ -27,25 +27,40 @@ export default {
   },
   data() {
     return {
-      casernes: [],
-      feux: [],
+      centres: [],
+      urgences: [],
       camions: [],
     };
   },
-  async mounted() {
+  async created() {
     /** Chargement asynchrone des données depuis les json */
-    await Promise.all([this.chargementCasernes(), this.chargementFeux()]);
+    await Promise.all([
+      this.chargementCentres(), this.chargementUrgences()
+    ]);
   },
   methods: {
-    async chargementCasernes() {
-      const response = await fetch("./data/casernes.json");
-      const casernes = await response.json();
-      this.casernes = casernes;
+    async chargementCentres() {
+      try {
+        // const response = await axios.get("");
+        const response = await fetch("./data/centres.json")
+        const centres = await response.json();
+        console.log(centres)
+        this.centres = centres;
+      } catch (error) {
+        console.error(error)
+      }
     },
-    async chargementFeux() {
-      const response = await fetch("./data/feux.json");
-      const feux = await response.json();
-      this.feux = feux;
+    async chargementUrgences() {
+      try {
+        // const response = await axios.get("");
+        const response = await fetch("./data/urgences.json");
+        const urgences = await response.json();
+          console.log(urgences)
+        this.urgences = urgences;
+      } catch (error) {
+        console.error(error)
+      }
+
     },
     onUpdateCamions(camions) {
       this.camions = camions;
@@ -86,7 +101,7 @@ export default {
 }
 
 #recapRessources {
-  display: flex;
+  display: none;
   justify-content: center;
   align-items: center;
   width: calc(100% * (1 / 4));

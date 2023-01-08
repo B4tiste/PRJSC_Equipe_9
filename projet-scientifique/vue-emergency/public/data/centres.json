@@ -1,0 +1,636 @@
+[
+    {
+        "available": true,
+        "id": 302,
+        "nom": "Centre 1",
+        "adresse": {
+            "id": 401,
+            "rue": "13 rue des beaumes",
+            "ville": "Lyon",
+            "etat": "Rhones-Alpes",
+            "codePostal": "69000",
+            "pays": "France"
+        },
+        "adresseId": 401,
+        "isAvailable": true,
+        "latitude": 45.78045523691529,
+        "longitude": 4.879839701019915,
+        "ressource": [
+            {
+                "id": 443,
+                "nom": "Ressource A 1",
+                "typeRessource": {
+                    "id": 214,
+                    "nom": "CAMION_POMPIER",
+                    "valeur": 0
+                },
+                "typeRessourceId": 0,
+                "statut": {
+                    "id": 884,
+                    "nom": "GARE",
+                    "valeur": 0
+                },
+                "statutId": 0,
+                "ressourceComposante": [
+                    {
+                        "available": true,
+                        "id": 1308,
+                        "nom": "Ressource Composante A 1",
+                        "isAvailable": true,
+                        "personnes": [
+                            {
+                                "id": 5959,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°0",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5960,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°1",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5961,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°2",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5962,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°3",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            }
+                        ],
+                        "personnesId": [
+                            5959,
+                            5960,
+                            5961,
+                            5962
+                        ]
+                    },
+                    {
+                        "available": true,
+                        "id": 1306,
+                        "nom": "Ressource Composante A 1",
+                        "isAvailable": true,
+                        "personnes": [
+                            {
+                                "id": 5951,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°0",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5952,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°1",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5953,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°2",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5954,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°3",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            }
+                        ],
+                        "personnesId": [
+                            5951,
+                            5952,
+                            5953,
+                            5954
+                        ]
+                    },
+                    {
+                        "available": true,
+                        "id": 1309,
+                        "nom": "Ressource Composante A 1",
+                        "isAvailable": true,
+                        "personnes": [
+                            {
+                                "id": 5963,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°0",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5964,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°1",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5965,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°2",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5966,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°3",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            }
+                        ],
+                        "personnesId": [
+                            5963,
+                            5964,
+                            5965,
+                            5966
+                        ]
+                    },
+                    {
+                        "available": true,
+                        "id": 1307,
+                        "nom": "Ressource Composante A 1",
+                        "isAvailable": true,
+                        "personnes": [
+                            {
+                                "id": 5955,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°0",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5956,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°1",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5957,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°2",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5958,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°3",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            }
+                        ],
+                        "personnesId": [
+                            5955,
+                            5956,
+                            5957,
+                            5958
+                        ]
+                    }
+                ],
+                "ressourceComposanteId": [
+                    1308,
+                    1306,
+                    1309,
+                    1307
+                ]
+            },
+            {
+                "id": 442,
+                "nom": "Ressource A 0",
+                "typeRessource": {
+                    "id": 214,
+                    "nom": "CAMION_POMPIER",
+                    "valeur": 0
+                },
+                "typeRessourceId": 0,
+                "statut": {
+                    "id": 884,
+                    "nom": "GARE",
+                    "valeur": 0
+                },
+                "statutId": 0,
+                "ressourceComposante": [
+                    {
+                        "available": true,
+                        "id": 1304,
+                        "nom": "Ressource Composante A 1",
+                        "isAvailable": true,
+                        "personnes": [
+                            {
+                                "id": 5943,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°0",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5944,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°1",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5945,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°2",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5946,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°3",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            }
+                        ],
+                        "personnesId": [
+                            5943,
+                            5944,
+                            5945,
+                            5946
+                        ]
+                    },
+                    {
+                        "available": true,
+                        "id": 1303,
+                        "nom": "Ressource Composante A 1",
+                        "isAvailable": true,
+                        "personnes": [
+                            {
+                                "id": 5939,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°0",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5940,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°1",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5941,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°2",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5942,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°3",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            }
+                        ],
+                        "personnesId": [
+                            5939,
+                            5940,
+                            5941,
+                            5942
+                        ]
+                    },
+                    {
+                        "available": true,
+                        "id": 1305,
+                        "nom": "Ressource Composante A 1",
+                        "isAvailable": true,
+                        "personnes": [
+                            {
+                                "id": 5947,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°0",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5948,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°1",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5949,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°2",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5950,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°3",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            }
+                        ],
+                        "personnesId": [
+                            5947,
+                            5948,
+                            5949,
+                            5950
+                        ]
+                    }
+                ],
+                "ressourceComposanteId": [
+                    1304,
+                    1303,
+                    1305
+                ]
+            }
+        ],
+        "ressourceId": [
+            443,
+            442
+        ]
+    },
+    {
+        "available": true,
+        "id": 303,
+        "nom": "Centre 2",
+        "adresse": {
+            "id": 402,
+            "rue": "14 rue des beaumes",
+            "ville": "Lyon",
+            "etat": "Rhones-Alpes",
+            "codePostal": "69000",
+            "pays": "France"
+        },
+        "adresseId": 402,
+        "isAvailable": true,
+        "latitude": 45.7753334606826, 
+        "longitude": 4.868260094758693,
+        "ressource": [
+            {
+                "id": 444,
+                "nom": "Ressource A 0",
+                "typeRessource": {
+                    "id": 214,
+                    "nom": "CAMION_POMPIER",
+                    "valeur": 0
+                },
+                "typeRessourceId": 0,
+                "statut": {
+                    "id": 884,
+                    "nom": "GARE",
+                    "valeur": 0
+                },
+                "statutId": 0,
+                "ressourceComposante": [
+                    {
+                        "available": true,
+                        "id": 1310,
+                        "nom": "Ressource Composante A 2",
+                        "isAvailable": true,
+                        "personnes": [
+                            {
+                                "id": 5967,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°0",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5968,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°1",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5969,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°2",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            }
+                        ],
+                        "personnesId": [
+                            5967,
+                            5968,
+                            5969
+                        ]
+                    },
+                    {
+                        "available": true,
+                        "id": 1311,
+                        "nom": "Ressource Composante A 2",
+                        "isAvailable": true,
+                        "personnes": [
+                            {
+                                "id": 5970,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°0",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5971,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°1",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            },
+                            {
+                                "id": 5972,
+                                "nom": "Jack",
+                                "prenom": "O'Neill N°2",
+                                "role": {
+                                    "id": 205,
+                                    "nom": "POMPIER",
+                                    "valeur": 0
+                                },
+                                "roleId": 0
+                            }
+                        ],
+                        "personnesId": [
+                            5970,
+                            5971,
+                            5972
+                        ]
+                    }
+                ],
+                "ressourceComposanteId": [
+                    1310,
+                    1311
+                ]
+            }
+        ],
+        "ressourceId": [
+            444
+        ]
+    },
+    {
+        "available": true,
+        "id": 304,
+        "nom": "Centre 3",
+        "adresse": {
+            "id": 403,
+            "rue": "12 rue des beaumes",
+            "ville": "Lyon",
+            "etat": "Rhones-Alpes",
+            "codePostal": "69000",
+            "pays": "France"
+        },
+        "adresseId": 403,
+        "isAvailable": true,
+        "latitude": 45.768408664285474,
+        "longitude": 4.900170416805945,
+        "ressource": [],
+        "ressourceId": [
+            446,
+            445
+        ]
+    }
+]
