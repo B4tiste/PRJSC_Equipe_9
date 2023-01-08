@@ -10,7 +10,7 @@ public class APICommunicationBdd {
 	public APICommunicationBdd()
 	{
 		try {
-			conn = DriverManager.getConnection("jdbc:postgresql://localhost:55432/dbSimulation","pgtp","tp");
+			conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/dbSimulation","postgres","postgres");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

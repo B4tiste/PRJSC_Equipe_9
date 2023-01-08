@@ -37,7 +37,7 @@ public class ThreadGenerateFire extends Thread {
         this.enFonction = enFonction;
         db_s = new AccesDataSimulation();
         //fires = new ArrayList <List<Flamme>>(); 
-        fires = db_s.getValuesFires();
+        
         
     }
     
@@ -45,6 +45,7 @@ public class ThreadGenerateFire extends Thread {
        //System.out.println();
        while(enFonction.getAndSet(true))
        {
+    	   
     	   try {
    			Thread.sleep(100);
 	   		} catch (InterruptedException e) {
@@ -52,7 +53,7 @@ public class ThreadGenerateFire extends Thread {
 	   			e.printStackTrace();
 	   		}
     	   
-    	   
+    	   fires = db_s.getValuesFires();
     	   //System.out.println("Ok");
     	   queue.clear();
     	  
@@ -99,7 +100,7 @@ public class ThreadGenerateFire extends Thread {
     				else
     				{
     					
-    					fires.get(i).addFlamme(new Flamme(0,fires.get(i).getFlamme(j).getx()+1,fires.get(i).getFlamme(j).getx(),9,fires.get(i).getFlamme(j).getDistanceDetectable()));
+    					fires.get(i).addFlamme(new Flamme(0,fires.get(i).getFlamme(j).getx()+1,fires.get(i).getFlamme(j).getx(),9,fires.get(i).getFlamme(j).getDistanceDetectable(),-1));
     				}
     			}
     			else
@@ -110,7 +111,7 @@ public class ThreadGenerateFire extends Thread {
     				}
     				else
     				{
-    					fires.get(i).addFlamme(new Flamme(0,fires.get(i).getFlamme(j).getx()+1,fires.get(i).getFlamme(j).getx(),9,fires.get(i).getFlamme(j).getDistanceDetectable()));
+    					fires.get(i).addFlamme(new Flamme(0,fires.get(i).getFlamme(j).getx()+1,fires.get(i).getFlamme(j).getx(),9,fires.get(i).getFlamme(j).getDistanceDetectable(),-1));
     				}
     			}
     			
@@ -133,7 +134,7 @@ public class ThreadGenerateFire extends Thread {
 		double distance = Math.random()*(distanceMax-intensite*distanceUnitaire );
 		
 		List<Flamme> flammes = new ArrayList<Flamme>();
-		flammes.add(new Flamme(-1,5,5,intensite,distance));
+		flammes.add(new Flamme(-1,5,5,intensite,distance,-1));
 		Feu fire = new Feu(flammes,-1);
 		fires.add(fire);
 	}

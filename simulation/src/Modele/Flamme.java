@@ -3,6 +3,7 @@ package Modele;
 public class Flamme {
 	
 	private int idFeuAppartient;
+	private int idFlamme;
 	private double x;
 	private double y;
 	private int intensite;
@@ -16,13 +17,14 @@ public class Flamme {
 	 * @param y
 	 * @param intensite
 	 */
-	public Flamme (int idFeuAppartient,double x, double y, int intensite, double distanceDetectable)
+	public Flamme (int idFeuAppartient,double x, double y, int intensite, double distanceDetectable, int idFlamme)
 	{
 		this.idFeuAppartient = idFeuAppartient;
 		this.x = x;
 		this.y = y;
 		this.intensite = intensite;
 		this.distanceDetectable = distanceDetectable;
+		this.idFlamme = idFlamme;
 	}
 	
 	/**
@@ -85,6 +87,11 @@ public class Flamme {
 			  "," + this.distanceDetectable
 			  +")";
 		}
+	
+	public int getIdFlamme()
+	{
+		return this.idFlamme;
+	}
 	
 	public int getIdFeuAppartient()
 	{
