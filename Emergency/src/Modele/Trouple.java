@@ -17,6 +17,7 @@ public class Trouple {
 		this.x = x;
 		this.y = y;
 		this.intensite = intensite;
+		
 	}
 	
 	/**
