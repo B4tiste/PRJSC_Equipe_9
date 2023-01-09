@@ -9,7 +9,7 @@
       />
     </div>
     <div class="map-container">
-      <Map 
+      <SimulationMap 
         :marqueursFeu="marqueursFeu"
         @update:coinsGrille="onCoinsGrilleChange"
       />
@@ -18,14 +18,14 @@
 </template>
 
 <script>
-import Map from "./components/Map.vue";
+import SimulationMap from "./components/SimulationMap.vue";
 import Menu from "./components/Menu.vue";
 import Simulation from "./components/Simulation.vue";
 
 export default {
   name: "App",
   components: {
-    Map,
+    SimulationMap,
     Menu,
     Simulation,
   },
