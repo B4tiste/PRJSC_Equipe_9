@@ -1,7 +1,7 @@
 <template>
   <div class="content">
     <div class="menu-container">
-      <Menu id="menu" />
+      <RecapSimulation id="menu" />
       <Simulation
         id="simulation"
         :coinsGrille="coinsGrille"
@@ -20,14 +20,14 @@
 
 <script>
 import SimulationMap from "./components/SimulationMap.vue";
-import Menu from "./components/Menu.vue";
+import RecapSimulation from "./components/RecapSimulation.vue";
 import Simulation from "./components/Simulation.vue";
 
 export default {
   name: "App",
   components: {
     SimulationMap,
-    Menu,
+    RecapSimulation,
     Simulation,
   },
   data() {
@@ -54,7 +54,7 @@ export default {
       this.coinsGrille = coinsGrille;
     },
     onMarqueursFeuChange(marqueursFeu) {
-      this.marqueursFeu = marqueursFeu;
+      this.marqueursFeu = [...marqueursFeu];
     }
   },
 };

@@ -52,7 +52,8 @@ export default {
           iconSize: [15, 15],
           iconAnchor: [0, 0],
           popupAnchor: [0, 0],
-        }), caserne: L.icon({
+        }),
+        caserne: L.icon({
           iconUrl: "./images/caserne.png",
           iconSize: [25, 25],
         }),
@@ -62,8 +63,8 @@ export default {
         }),
       },
       coinsGrille: [
-        45.763823823027685, 4.8618173788693015,
-        45.79019363295949, 4.907187868645735
+        45.763823823027685, 4.8618173788693015, 45.79019363295949,
+        4.907187868645735,
       ],
       capteurFeatureCollection: [],
       grid: {},
@@ -71,16 +72,17 @@ export default {
       capteursMarqueurs: [],
       sontTousActives: false,
       nbCapteursMinimum: 3,
-      marqueursCasernes: []
+      marqueursCasernes: [],
+      incidentsPrisEnCompte: [],
     };
   },
   props: {
     marqueursFeu: {
-      type: Array
+      type: Array,
     },
     centres: {
-      type: Array
-    }
+      type: Array,
+    },
   },
   beforeMount() {
     this.grid = turf.pointGrid(this.coinsGrille, 500, {
@@ -98,16 +100,24 @@ export default {
   },
   watch: {
     marqueursFeu() {
-      console.log(this.marqueursFeu)
       this.marqueursFeu.forEach((marqueur) => {
-        console.log(marqueur)
-        this.findNearestPoint([marqueur.getLatLng().lat, marqueur.getLatLng().lng])
-        marqueur.addTo(this.map)
-      })
+        if (!this.feuPrisEnCompte(marqueur)) {
+          this.incidentsPrisEnCompte.push(marqueur);
+          this.findNearestPoint([
+            marqueur.getLatLng().lat,
+            marqueur.getLatLng().lng,
+          ]);
+          marqueur.addTo(this.map);
+          /** Envoie des ressources */
+          setTimeout(() => {
+            this.envoyerRessources(marqueur.getLatLng());
+          }, 3000);
+        }
+      });
     },
     centres() {
       this.initCentres();
-    }
+    },
   },
   methods: {
     /**
@@ -134,7 +144,7 @@ export default {
       }).setView(this.centre, this.zoom);
       const lightLayer = L.tileLayer(
         "https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=" +
-        process.env.VUE_APP_MAPBOX_ACCESS_TOKEN,
+          process.env.VUE_APP_MAPBOX_ACCESS_TOKEN,
         {
           attribution: credits,
           maxZoom: this.maxZoom,
@@ -203,7 +213,7 @@ export default {
      * @param {Object} caserne
      */
     creationMarqueurCaserne(caserne) {
-      var marqueur = {}
+      var marqueur = {};
       if (caserne.isAvailable && caserne.ressource.length !== 0) {
         const ressources = this.compteRessourcesDisponibles(caserne);
         marqueur = L.marker([caserne.latitude, caserne.longitude], {
@@ -221,7 +231,6 @@ export default {
         }).bindTooltip(this.creationTooltipCaserne(caserne));
       }
       this.marqueursCasernes.push(marqueur);
-      console.log(marqueur)
       return marqueur;
     },
     /**
@@ -369,6 +378,25 @@ export default {
       } else {
         return false;
       }
+    },
+    envoyerRessources(coordonnees) {
+      console.log("envoie en ", coordonnees);
+    },
+    feuPrisEnCompte(marqueur) {
+      if (this.incidentsPrisEnCompte.length === 0) {
+        return false;
+      }
+
+      this.incidentsPrisEnCompte.forEach((incident) => {
+        if (
+          incident.getLatLng().lat === marqueur.getLatLng().lat &&
+          incident.getLatLng().lng === marqueur.getLatLng().lng
+        ) {
+          return true;
+        } 
+      });
+      
+      return false;
     },
   },
 };
