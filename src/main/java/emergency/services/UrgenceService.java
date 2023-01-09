@@ -280,9 +280,9 @@ public class UrgenceService extends BaseService {
                             urgence_get.getIncident().getLatitude(),
                             pageable
                     );
-                    if(vehicules.size()>0)
+                    if(vehicules.hasContent())
                     {
-                        for(var vehicle : vehicules)
+                        for(var vehicle : vehicules.getContent())
                         {
                             if(vehicle.isAvailable()==Boolean.TRUE)
                             {
@@ -314,6 +314,7 @@ public class UrgenceService extends BaseService {
 
                                     }
                                 }
+                                urgence_get.setRessources(res);
                                 if(filled_res<=0)
                                 {
                                     filled = Boolean.TRUE;
@@ -330,6 +331,7 @@ public class UrgenceService extends BaseService {
 
 
             }
+            urgence_get = (Urgence)this.CreateOrUpdateOrGet(urgence_get);
             return urgence_get;
 
         } catch (Exception e) {

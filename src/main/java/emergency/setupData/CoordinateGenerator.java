@@ -22,7 +22,7 @@ public class CoordinateGenerator {
         return coordinates;
     }
 
-    private static double calculateDistance(double[] pos1, double[] pos2) {
+    public static double calculateDistance(double[] pos1, double[] pos2) {
         double lat1 = Math.toRadians(pos1[0]);
         double lng1 = Math.toRadians(pos1[1]);
         double lat2 = Math.toRadians(pos2[0]);

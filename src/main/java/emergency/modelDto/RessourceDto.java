@@ -35,6 +35,11 @@ public class RessourceDto extends GBaseDto implements IBaseModelDto {
     @JsonProperty("statutId")
     private Long statutId;
 
+    @JsonProperty("centre")
+    private CentreDto centre;
+
+    @JsonProperty("centreId")
+    private Long centreId;
 
     @JsonProperty("ressourceComposante")
     private List<RessourceComposanteDto> ressourceComposante;
@@ -112,7 +117,21 @@ public class RessourceDto extends GBaseDto implements IBaseModelDto {
         return ressourceComposanteId;
     }
 
+    public CentreDto getCentre() {
+        return centre;
+    }
 
+    public void setCentre(CentreDto centre) {
+        this.centre = centre;
+    }
+
+    public Long getCentreId() {
+        return centreId;
+    }
+
+    public void setCentreId(Long centreId) {
+        this.centreId = centreId;
+    }
     public List<VehiculeDto> getVehicules() {
         return vehicules;
     }
@@ -168,6 +187,22 @@ public class RessourceDto extends GBaseDto implements IBaseModelDto {
                 e.printStackTrace();
             }
         }
+        if(this.getCentre()!=null)
+        {
+            try {
+                model.setCentre((Centre) this.getCentre().toModel());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        else if(this.getCentreId()!=null)
+        {
+            try {
+                model.setCentre((Centre)ReferentielDefinitions.serviceDefinitions.getCentreService().getById(this.getCentreId()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         List<RessourceComposante> data = new ArrayList<>();
         Boolean data_present = Boolean.FALSE;
         if(this.getRessourceComposante()!=null)
@@ -175,12 +210,39 @@ public class RessourceDto extends GBaseDto implements IBaseModelDto {
             if(this.getRessourceComposante().size()>0)
             {
                 data_present = Boolean.TRUE;
+                Boolean is_a_car = Boolean.FALSE;
                 for(var ressourceComposante : this.getRessourceComposante())
                 {
+                    if(this.getVehiculesId()!=null)
+                    {
+                        if(this.getVehiculesId().contains(ressourceComposante.getId()))
+                        {
+                            is_a_car = Boolean.TRUE;
+                        }
+
+                    }
+                    if(this.getVehicules()!=null)
+                    {
+                        for(var veh : this.getVehicules())
+                        {
+                            if(veh.getId()==ressourceComposante.getId())
+                            {
+                                is_a_car = Boolean.TRUE;
+                            }
+                        }
+
+                    }
                     try {
-                        var dest_ressourceComposante = (RessourceComposante)ressourceComposante.toModel();
-                        dest_ressourceComposante.setRessource(model);
-                        data.add(dest_ressourceComposante);
+                        if(is_a_car)
+                        {
+                            //It is a car, so avoid
+                        }
+                        else
+                        {
+                            var dest_ressourceComposante = (RessourceComposante)ressourceComposante.toModel();
+                            dest_ressourceComposante.setRessource(model);
+                            data.add(dest_ressourceComposante);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

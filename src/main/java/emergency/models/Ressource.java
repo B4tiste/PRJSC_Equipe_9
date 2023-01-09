@@ -138,7 +138,28 @@ public class Ressource implements IBaseModel  {
     public RessourceDto toDto(Boolean onlyId)
     {
         RessourceDto dest = new RessourceDto();
-
+        if(this.getCentre()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    dest.setCentreId(Long.valueOf(this.getCentre().getId()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    dest.setCentre(this.getCentre().toDto(Boolean.TRUE));
+                    dest.setCentreId(Long.valueOf(this.getCentre().getId()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
         if(this.getRessourceComposantes()!=null)
         {
             if(onlyId==Boolean.TRUE)

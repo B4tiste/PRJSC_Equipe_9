@@ -1,8 +1,11 @@
 package emergency.modelDto;
 
+import emergency.baseReferentiel.ReferentielDefinitions;
 import emergency.interfacesDefinition.IBaseModelDto;
 import emergency.modelDto.GBaseDto;
+import emergency.models.Centre;
 import emergency.models.Personne;
+import emergency.models.Statut;
 import emergency.models.Vehicule;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jetbrains.annotations.NotNull;
@@ -65,6 +68,44 @@ public class VehiculeDto extends RessourceComposanteDto implements IBaseModelDto
         model.setLongitude(this.getLongitude());
         List<Personne> data = new ArrayList<>();
         Boolean data_present = Boolean.FALSE;
+        if(this.getStatut()!=null)
+        {
+            try {
+                model.setStatut((Statut) this.getStatut().toModel());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        else if(this.getStatutId()!=null)
+        {
+            try {
+                model.setStatut(ReferentielDefinitions.getStatut(this.getStatutId()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        if(this.getCentre()!=null)
+        {
+            try {
+                model.setCentre((Centre) this.getCentre().toModel());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        else if(this.getCentreId()!=null)
+        {
+            try {
+                var serv = this.getServices().getCentreService();
+                model.setCentre((Centre)serv.getById(this.getCentreId()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+
         if(this.getPersonnes()!=null)
         {
             if(this.getPersonnes().size()>0)

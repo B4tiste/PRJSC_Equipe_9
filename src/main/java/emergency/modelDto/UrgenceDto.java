@@ -162,7 +162,9 @@ public class UrgenceDto extends GBaseDto implements IBaseModelDto {
         {
             try
             {
-                model.setIncident((Incident) this.getIncident().toModel());
+                var incident = (Incident) this.getIncident().toModel();
+                incident.setUrgence(model);
+                model.setIncident(incident);
             }
             catch(Exception e)
             {
@@ -173,7 +175,9 @@ public class UrgenceDto extends GBaseDto implements IBaseModelDto {
         {
             try
             {
-                model.setIncident((Incident)this.getServices().getIncidentService().getById(this.getIncidentId()));
+                var incident = (Incident)this.getServices().getIncidentService().getById(this.getIncidentId());
+                incident.setUrgence(model);
+                model.setIncident(incident);
             }
             catch(Exception e)
             {
@@ -240,6 +244,10 @@ public class UrgenceDto extends GBaseDto implements IBaseModelDto {
                 try {
                     var serv = this.getServices().getRessourceService();
                     var val = (List<Ressource>)(List<?>)serv.GetThem(this.getRessourcesId());
+                    for(var d : val)
+                    {
+                        d.setUrgence(model);
+                    }
                     data = val;
                 } catch (Exception e) {
                     e.printStackTrace();

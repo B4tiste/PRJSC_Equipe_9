@@ -151,6 +151,50 @@ public class Vehicule extends RessourceComposante {
             }
         }
         dest.setId(this.getId());
+        if(this.getStatut()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    dest.setStatutId(Long.valueOf(this.getStatut().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    dest.setStatut(this.getStatut().toDto(onlyId));
+                    dest.setStatutId(Long.valueOf(this.getStatut().getValeur()));
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
+        if(this.getCentre()!=null)
+        {
+            if(onlyId==Boolean.TRUE)
+            {
+                try{
+                    dest.setCentreId(this.getCentre().getId());
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            else
+            {
+                try{
+                    dest.setCentre(this.getCentre().toDto(Boolean.TRUE));
+                    dest.setCentreId(this.getCentre().getId());
+                }catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        }
         try {
             dest.setNom(this.getNom());
         } catch (Exception e) {

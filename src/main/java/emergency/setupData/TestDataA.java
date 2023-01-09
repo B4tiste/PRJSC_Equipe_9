@@ -42,7 +42,7 @@ public final class TestDataA {
             c_1.setNom("Centre "+m);
             c_1.setAvailable(Boolean.TRUE);
             c_1.setLatitude(pos_1[0] + (pos_2[0]-pos_1[0])*((Math.cos(SEED+m)+1)/2.0));
-            c_1.setLongitude(pos_1[0] + (pos_2[0]-pos_1[0])*((Math.sin(SEED+m+1.5678)+1)/2.0));
+            c_1.setLongitude(pos_1[1] + (pos_2[1]-pos_1[1])*((Math.sin(SEED+m+1.5678)+1)/2.0));
 
             Adresse addr = apiGeocoding.reverseGeocode(c_1.getLatitude(), c_1.getLongitude());
 
@@ -60,11 +60,15 @@ public final class TestDataA {
                 List<RessourceComposante> rcComposantes = new ArrayList<>();
                 for(int e = 0;e<2+SEED%2+m%2+d%2; e++)
                 {
-                    RessourceComposante rc_1 = new RessourceComposante();
-                    rc_1.setStatut(ReferentielDefinitions.getStatut(STATUT_RESSOURCE.EN_ARRET.name()));
+                    Vehicule rc_1 = new Vehicule();
+                    rc_1.setStatut(ReferentielDefinitions.getStatut(STATUT_RESSOURCE.GARE.name()));
                     rc_1.setAvailable(Boolean.TRUE);
                     rc_1.setNom("Ressource Composante A "+m);
                     rc_1.setRessource(r_1);
+                    rc_1.setCapacite(Long.valueOf(10));
+                    rc_1.setLatitude(c_1.getLatitude());
+                    rc_1.setLongitude(c_1.getLongitude());
+
                     rc_1.setCentre(c_1);
 
                     List<Personne> personnes = new ArrayList<>();
@@ -110,7 +114,8 @@ public final class TestDataA {
             if(disposition=="default")
             {
                 microcontroller.setLatitude(pos_1[0] + (pos_2[0]-pos_1[0])*((Math.cos(SEED+m*1.45)+1)/2.0));
-                microcontroller.setLongitude(pos_2[0] + (pos_2[0]-pos_1[0])*((Math.sin(SEED+m+1.9878)+1)/2.0));
+                microcontroller.setLongitude(pos_1[1] + (pos_2[1]-pos_1[1])*((Math.sin(SEED+m+1.7678)+1)/2.0));
+
             }
             else{
                 microcontroller.setLatitude(coordinates.get(m)[0]);
@@ -167,7 +172,7 @@ public final class TestDataA {
             urgence.setTitre("Urgence TEST n°"+u);
 
             incident.setLatitude(pos_1[0] + (pos_2[0]-pos_1[0])*((Math.cos(SEED+u)+1*0.4356)/2.0));
-            incident.setLongitude(pos_2[0] + (pos_2[0]-pos_1[0])*((Math.sin(SEED+u+2.3678)+1)/2.0));
+            incident.setLongitude(pos_1[1] + (pos_2[1]-pos_1[1])*((Math.sin(SEED+u+2.4678)+1)/2.0));
 
             Adresse addr = apiGeocoding.reverseGeocode(incident.getLatitude(), incident.getLongitude());
 
