@@ -9,7 +9,8 @@
       />
     </div>
     <div class="map-container">
-      <SimulationMap 
+      <SimulationMap
+        :centres="centres"
         :marqueursFeu="marqueursFeu"
         @update:coinsGrille="onCoinsGrilleChange"
       />
@@ -32,10 +33,23 @@ export default {
   data() {
     return {
       coinsGrille: null,
-      marqueursFeu: null
+      marqueursFeu: null,
+      centres: null
     };
   },
+  async created() {
+    await Promise.all([this.chargementCentres()])
+  },
   methods: {
+    async chargementCentres() {
+      try {
+        const response = await fetch("./data/centres.json");
+        const centres = await response.json();
+        this.centres = centres;
+      } catch (error) {
+        console.error(error);
+      }
+    },
     onCoinsGrilleChange(coinsGrille) {
       this.coinsGrille = coinsGrille;
     },

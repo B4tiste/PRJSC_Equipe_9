@@ -6,6 +6,7 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import * as turf from "@turf/turf";
+import TypeRessource from "./../enums/TypeRessource";
 
 export default {
   data() {
@@ -13,7 +14,7 @@ export default {
       /** @type L.map */
       map: null,
       zoom: 14,
-      minZoom: 12,
+      minZoom: 14,
       maxZoom: 18,
       /** @type array */
       centre: [45.7766461124361, 4.884143173956448],
@@ -28,14 +29,14 @@ export default {
       icons: {
         blueIcon: L.icon({
           iconUrl:
-            "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+            "https://raw.githubusercontent.com/pointhi/leaflet-color-marqueurs/master/img/marqueur-icon-2x-blue.png",
           iconSize: [20, 36],
           iconAnchor: [0, 0],
           popupAnchor: [0, 0],
         }),
         redIcon: L.icon({
           iconUrl:
-            "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+            "https://raw.githubusercontent.com/pointhi/leaflet-color-marqueurs/master/img/marqueur-icon-2x-red.png",
           iconSize: [8, 14],
           iconAnchor: [0, 0],
           popupAnchor: [0, 0],
@@ -51,7 +52,14 @@ export default {
           iconSize: [15, 15],
           iconAnchor: [0, 0],
           popupAnchor: [0, 0],
-        })
+        }), caserne: L.icon({
+          iconUrl: "./images/caserne.png",
+          iconSize: [25, 25],
+        }),
+        caserneInactive: L.icon({
+          iconUrl: "./images/caserne-inactive.png",
+          iconSize: [25, 25],
+        }),
       },
       coinsGrille: [
         45.763823823027685, 4.8618173788693015,
@@ -62,20 +70,24 @@ export default {
       capteurActives: [],
       capteursMarqueurs: [],
       sontTousActives: false,
-      nbCapteursMinimum: 3
+      nbCapteursMinimum: 3,
+      marqueursCasernes: []
     };
   },
   props: {
     marqueursFeu: {
-      type: Array,
+      type: Array
     },
+    centres: {
+      type: Array
+    }
   },
   beforeMount() {
     this.grid = turf.pointGrid(this.coinsGrille, 500, {
       units: "meters",
     });
   },
-  mounted() {
+  async mounted() {
     this.initMap();
     this.initCapteurs();
 
@@ -88,9 +100,13 @@ export default {
     marqueursFeu() {
       console.log(this.marqueursFeu)
       this.marqueursFeu.forEach((marqueur) => {
+        console.log(marqueur)
         this.findNearestPoint([marqueur.getLatLng().lat, marqueur.getLatLng().lng])
         marqueur.addTo(this.map)
       })
+    },
+    centres() {
+      this.initCentres();
     }
   },
   methods: {
@@ -102,7 +118,6 @@ export default {
         /* html */
         `Projet Scientifique
             - CPE Lyon 4IRC - 2022/2023`;
-
       this.map = L.map("map", {
         preferCanvas: true,
         zoomControl: false,
@@ -112,15 +127,14 @@ export default {
           L.latLng(this.limitesCarte[0]),
           L.latLng(this.limitesCarte[1])
         ),
-        zoomAnimation:false,
-        fadeAnimation:true,
-        markerZoomAnimation:false,
-        doubleClickZoom: false
+        zoomAnimation: false,
+        fadeAnimation: true,
+        marqueurZoomAnimation: false,
+        doubleClickZoom: false,
       }).setView(this.centre, this.zoom);
-
       const lightLayer = L.tileLayer(
         "https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=" +
-          process.env.VUE_APP_MAPBOX_ACCESS_TOKEN,
+        process.env.VUE_APP_MAPBOX_ACCESS_TOKEN,
         {
           attribution: credits,
           maxZoom: this.maxZoom,
@@ -132,9 +146,7 @@ export default {
           visible: true,
         }
       );
-
       lightLayer.addTo(this.map);
-
       L.control
         .scale({
           imperial: false,
@@ -152,54 +164,131 @@ export default {
 
       this.grid.features.forEach((capteur) => {
         capteurs.push(turf.point(capteur.geometry.coordinates));
-        const marker = L.marker(capteur.geometry.coordinates, {
+        const marqueur = L.marker(capteur.geometry.coordinates, {
           icon: this.icons.sensor,
         });
 
-        this.capteursMarqueurs.push(marker);
-        marker.addTo(this.map);
+        this.capteursMarqueurs.push(marqueur);
+        marqueur.addTo(this.map);
       });
       this.capteurs = capteurs;
+    },
+    initCentres() {
+      /** Création d'une collection de TurfPoint */
+      this.centresFeatureCollection = turf.featureCollection([]);
+      this.centres.forEach((centre) => {
+        const turfPoint = turf.point([centre.latitude, centre.longitude]);
+        if (centre.isAvailable && centre.ressource.length !== 0) {
+          this.centresFeatureCollection.features.push(turfPoint);
+        }
+        /** Ressources associées */
+        const caserneMarqueur = this.creationMarqueurCaserne(centre);
+        /** Ajout du marqueur */
+        caserneMarqueur.addTo(this.map);
+      });
+    },
+    creationTooltipCaserne(caserne, nbCamions = 0, nbPompiers = 0) {
+      const adresse = caserne.adresse;
+      return `<div>
+          <h3>${caserne.nom}</h3>
+          <p>
+            ${adresse.rue}  
+          </p>
+          <p>${nbCamions} camions disponibles</p>
+          <p>${nbPompiers} pompiers disponibles</p>
+        </div>
+      `;
+    },
+    /**
+     * @param {Object} caserne
+     */
+    creationMarqueurCaserne(caserne) {
+      var marqueur = {}
+      if (caserne.isAvailable && caserne.ressource.length !== 0) {
+        const ressources = this.compteRessourcesDisponibles(caserne);
+        marqueur = L.marker([caserne.latitude, caserne.longitude], {
+          icon: this.icons.caserne,
+        }).bindTooltip(
+          this.creationTooltipCaserne(
+            caserne,
+            ressources.nbCamions,
+            ressources.nbPompiers
+          )
+        );
+      } else {
+        marqueur = L.marker([caserne.latitude, caserne.longitude], {
+          icon: this.icons.caserneInactive,
+        }).bindTooltip(this.creationTooltipCaserne(caserne));
+      }
+      this.marqueursCasernes.push(marqueur);
+      console.log(marqueur)
+      return marqueur;
+    },
+    /**
+     * @param {Object} caserne
+     */
+    compteRessourcesDisponibles(caserne) {
+      var nbCamions = 0;
+      var nbPompiers = 0;
+      caserne.ressource.forEach((ressource) => {
+        if (ressource.typeRessource.nom === TypeRessource.CAMION_POMPIER) {
+          nbCamions += 1;
+        }
+        nbPompiers = this.compteNombrePersonnesDisponibles(ressource);
+      });
+      return {
+        nbCamions: nbCamions,
+        nbPompiers: nbPompiers,
+      };
+    },
+    compteNombrePersonnesDisponibles(caserne) {
+      var nbPersonnes = 0;
+      caserne.ressourceComposante.forEach((ressource) => {
+        if (ressource.isAvailable) {
+          nbPersonnes += ressource.personnes.length;
+        }
+      });
+      return nbPersonnes;
     },
     /**
      * Trouve le point le plus proche du click
      */
     findNearestPoint(point) {
-        const turfPoint = turf.point([point[0], point[1]]);
+      const turfPoint = turf.point([point[0], point[1]]);
 
-        var tempCapteurFeatureCollection = this.capteurFeatureCollection;
-        var tempcapteursMarqueurs = this.capteursMarqueurs;
+      var tempCapteurFeatureCollection = this.capteurFeatureCollection;
+      var tempcapteursMarqueurs = this.capteursMarqueurs;
 
-        for (var i = 0; i < this.nbCapteursMinimum; i++) {
-          if (tempCapteurFeatureCollection.features.length !== 0) {
-            const nearest = turf.nearestPoint(
-              turfPoint,
+      for (var i = 0; i < this.nbCapteursMinimum; i++) {
+        if (tempCapteurFeatureCollection.features.length !== 0) {
+          const nearest = turf.nearestPoint(
+            turfPoint,
+            tempCapteurFeatureCollection
+          );
+
+          if (!this.verifieCapteurDejaActif(nearest)) {
+            this.capteurActives.push(nearest.geometry);
+
+            const index = this.findIndexOfmarqueur(
+              nearest,
               tempCapteurFeatureCollection
             );
 
-            if (!this.verifieCapteurDejaActif(nearest)) {
-              this.capteurActives.push(nearest.geometry);
+            if (index !== -1) {
+              const marqueur = tempcapteursMarqueurs[index];
 
-              const index = this.findIndexOfMarker(
-                nearest,
-                tempCapteurFeatureCollection
-              );
+              tempCapteurFeatureCollection.features.splice(index, 1);
+              tempcapteursMarqueurs.splice(index, 1);
 
-              if (index !== -1) {
-                const marker = tempcapteursMarqueurs[index];
+              this.map.removeLayer(marqueur);
 
-                tempCapteurFeatureCollection.features.splice(index, 1);
-                tempcapteursMarqueurs.splice(index, 1);
-
-                this.map.removeLayer(marker);
-
-                L.marker(nearest.geometry.coordinates, {
-                  icon: this.icons.sensorActivate,
-                }).addTo(this.map);
-              }
+              L.marker(nearest.geometry.coordinates, {
+                icon: this.icons.sensorActivate,
+              }).addTo(this.map);
             }
           }
         }
+      }
     },
     findNearestPointOnClick() {
       this.map.on("click", (e) => {
@@ -219,18 +308,18 @@ export default {
             if (!this.verifieCapteurDejaActif(nearest)) {
               this.capteurActives.push(nearest.geometry);
 
-              const index = this.findIndexOfMarker(
+              const index = this.findIndexOfmarqueur(
                 nearest,
                 tempCapteurFeatureCollection
               );
 
               if (index !== -1) {
-                const marker = tempcapteursMarqueurs[index];
+                const marqueur = tempcapteursMarqueurs[index];
 
                 tempCapteurFeatureCollection.features.splice(index, 1);
                 tempcapteursMarqueurs.splice(index, 1);
 
-                this.map.removeLayer(marker);
+                this.map.removeLayer(marqueur);
 
                 L.marker(nearest.geometry.coordinates, {
                   icon: this.icons.sensorActivate,
@@ -246,7 +335,7 @@ export default {
      * @param {turf.point} nearest
      * @param {turf.featureCollection} capteurFeatureCollection
      */
-    findIndexOfMarker(nearest, tableau) {
+    findIndexOfmarqueur(nearest, tableau) {
       for (var i = 0; i < tableau.features.length; i++) {
         const capteur = tableau.features[i].geometry.coordinates;
         if (
@@ -259,7 +348,7 @@ export default {
       return -1;
     },
     /**
-     * Vérifie si un capteur est déjà actif pour éviter de recréer le marker
+     * Vérifie si un capteur est déjà actif pour éviter de recréer le marqueur
      * @param {turf.point} nearest
      */
     verifieCapteurDejaActif(nearest) {
@@ -291,7 +380,7 @@ export default {
   height: 100%;
 }
 
-.leaflet-marker-icon {
-  transform-origin: center center!important;
+.leaflet-marqueur-icon {
+  transform-origin: center center !important;
 }
 </style>
