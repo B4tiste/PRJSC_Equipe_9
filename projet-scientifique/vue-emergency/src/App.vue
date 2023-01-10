@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-    <EmergencyApp
+    <EmergencyMap
       id="map"
       :centres="centres"
       :urgences="urgences"
@@ -16,13 +16,13 @@
 </template>
 
 <script>
-import EmergencyApp from "./components/EmergencyApp.vue";
+import EmergencyMap from "./components/EmergencyMap.vue";
 import RecapRessources from "./components/RecapRessources.vue";
 
 export default {
   name: "App",
   components: {
-    EmergencyApp,
+    EmergencyMap,
     RecapRessources,
   },
   data() {
