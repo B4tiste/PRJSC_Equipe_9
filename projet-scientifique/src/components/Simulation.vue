@@ -35,7 +35,8 @@ export default {
                     iconSize: [90, 90],
                 }),
             },
-            marqueursFeu: []
+            marqueursFeu: [],
+            nombreFeu: 6
         };
     },
     props: {
@@ -71,7 +72,7 @@ export default {
          * @param {Number[]} coordonnees 
          */
         creationMarqueurFeu(coordonnees) {
-            if (this.marqueursFeu.length < 3) {
+            if (this.marqueursFeu.length < this.nombreFeu) {
                 this.marqueursFeu.push(L.marker(coordonnees, {
                     icon: this.icons.feuIcon,
                 }));
