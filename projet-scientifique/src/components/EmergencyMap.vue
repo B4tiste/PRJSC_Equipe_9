@@ -22,7 +22,7 @@ export default {
       minZoom: 15,
       maxZoom: 19,
       /** @type {Number[]} */
-      centre: [45.7766461124361, 4.884143173956448],
+      centre: [45.77698956668263, 4.885078028351652],
       /** @type {Number[][]} */
       limitesCarte: [
         // en bas à gauche
@@ -248,7 +248,7 @@ export default {
     /**
      * @param {L.Routing.RouteSelectedEvent} e
      */
-    onRouteSelectedEvent(e, caserne) {
+    onRouteSelectedEvent(e) {
       /** Envoie des ressources */
       var camion = {
         position: L.marker(e.route.coordinates[0], {
@@ -272,7 +272,6 @@ export default {
           }
         }, 150 * index);
       });
-      console.log(caserne);
     },
 
     /**
@@ -300,7 +299,6 @@ export default {
     },
     initLayerControl() {
       this.layerControlFiltres.addTo(this.map);
-      this.layerControlRecentrer.addTo(this.map);
     },
     initIconFeu() {
       const tailleFeu = this.nombreAleatoire(20, 50);
@@ -337,9 +335,7 @@ export default {
       return marker;
     },
     trouveMarqueurCaserne(coordonnes) {
-      console.log(coordonnes);
       this.marqueursCasernes.forEach((marqueur) => {
-        console.log(marqueur);
         if (
           this.estMarqueurSurPosition(
             marqueur,
@@ -422,15 +418,9 @@ export default {
 
         /** Ecoute de l'évènement "routeselected" */
         routingLayer.on("routeselected", (e) => {
-          this.onRouteSelectedEvent(e, coordonnes);
+          this.onRouteSelectedEvent(e);
         });
-        console.log(caserneLaPlusProche);
 
-        /** Gestion des ressources */
-        const caserneMarqueur = this.trouveMarqueurCaserne(
-          caserneLaPlusProche.geometry
-        );
-        console.log(caserneMarqueur);
         this.ajouteRouteSurMap(routingLayer, waypoints);
       } catch (error) {
         console.warn(error);
