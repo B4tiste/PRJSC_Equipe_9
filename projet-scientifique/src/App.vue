@@ -108,4 +108,8 @@ export default {
   width: 100%;
   background-color: lightblue;
 }
+.leaflet-routing-container {
+  visibility: hidden;
+  /* Cacher le carré vide de la liste de étapes de l'itinéraire */
+}
 </style>

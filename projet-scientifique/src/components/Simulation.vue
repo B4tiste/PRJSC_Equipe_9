@@ -75,10 +75,8 @@ export default {
                 this.marqueursFeu.push(L.marker(coordonnees, {
                     icon: this.icons.feuIcon,
                 }));
-                console.log(this.marqueursFeu)
                 this.$emit("update:marqueursFeu", this.marqueursFeu);
             } else {
-                //this.$emit("update:marqueursFeu", this.marqueursFeu);
                 clearInterval(this.interval)
             }
         }

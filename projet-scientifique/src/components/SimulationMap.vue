@@ -5,6 +5,7 @@
 <script>
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import "leaflet-routing-machine";
 import * as turf from "@turf/turf";
 import TypeRessource from "./../enums/TypeRessource";
 
@@ -60,6 +61,14 @@ export default {
         caserneInactive: L.icon({
           iconUrl: "./images/caserne-inactive.png",
           iconSize: [25, 25],
+        }),
+        camion: L.icon({
+          iconUrl: "./images/camion-de-pompier.png",
+          iconSize: [30, 30],
+        }),
+        camionEau: L.icon({
+          iconUrl: "./images/camion-de-pompier-eau.png",
+          iconSize: [30, 30],
         }),
       },
       coinsGrille: [
@@ -165,6 +174,34 @@ export default {
           position: "bottomleft",
         })
         .addTo(this.map);
+    },
+    initRoutingLayer() {
+      const routingLayer = L.routing.control({
+        fitSelectedRoutes: false,
+        autoRoute: true,
+        routeWhileDragging: false,
+        routeDragInterval: 500,
+        draggableWaypoints: false,
+        waypointMode: "connect",
+        useZoomParameter: false,
+        showAlternatives: true,
+        addWaypoints: false,
+        allowUTurn: true,
+        lineOptions: {
+          styles: [{ color: "red", opacity: 1, weight: 2 }],
+          missingRouteTolerance: 0,
+          extendToWaypoints: false,
+        },
+        altLineOptions: {
+          styles: [{ color: "darkgrey", opacity: 1, weight: 6 }],
+          missingRouteTolerance: 0,
+          extendToWaypoints: false,
+        },
+        show: true,
+        language: "fr",
+        suppressDemoServerWarning: true,
+      });
+      return routingLayer;
     },
     /**
      * Méthode d'initialisation des capteurs
@@ -380,25 +417,93 @@ export default {
       }
     },
     envoyerRessources(coordonnees) {
+      this.trouveCheminLePlusProche(coordonnees)
       console.log("envoie en ", coordonnees);
     },
     feuPrisEnCompte(marqueur) {
       if (this.incidentsPrisEnCompte.length === 0) {
         return false;
       }
+      var estTrouve = false;
 
       this.incidentsPrisEnCompte.forEach((incident) => {
         if (
           incident.getLatLng().lat === marqueur.getLatLng().lat &&
           incident.getLatLng().lng === marqueur.getLatLng().lng
         ) {
-          return true;
-        } 
+          estTrouve = true;
+        }
       });
       
-      return false;
+      return estTrouve;
+    }, 
+    /**
+     * @param {Number[]} coordonnes
+     */
+    trouveCheminLePlusProche(coordonnes) {
+      // TODO gérer les récupérations de données par rapport à l'id de la caserne
+      const turfPoint = turf.point([coordonnes.lat, coordonnes.lng]);
+      try {
+        const caserneLaPlusProche = turf.nearestPoint(
+          turfPoint,
+          this.centresFeatureCollection
+        )
+        const waypoints = [
+          L.latLng(
+            caserneLaPlusProche.geometry.coordinates[0],
+            caserneLaPlusProche.geometry.coordinates[1]
+          ),
+          L.latLng(coordonnes.lat, coordonnes.lng),
+        ];
+        const routingLayer = this.initRoutingLayer();
+        
+        /** Ecoute de l'évènement "routeselected" */
+        routingLayer.on("routeselected", (e) => {
+          this.onRouteSelectedEvent(e, coordonnes);
+        });
+
+        this.ajouteRouteSurMap(routingLayer, waypoints);
+      } catch (error) {
+        console.warn(error);
+        console.warn("Aucune caserne à disponibilité");
+      }
+    },
+    ajouteRouteSurMap(routingLayer, waypoints) {
+      routingLayer.setWaypoints(waypoints);
+      routingLayer.route();
+      routingLayer.addTo(this.map);
+    },
+    /**
+     * @param {L.Routing.RouteSelectedEvent} e
+     */
+    onRouteSelectedEvent(e, caserne) {
+      /** Envoie des ressources */
+      var camion = {
+        position: L.marker(e.route.coordinates[0], {
+          icon: this.icons.camion,
+        }),
+      };
+      
+      camion.position.addTo(this.map);
+      e.route.coordinates.forEach((coord, index) => {
+        setTimeout(() => {
+          camion.position.setLatLng([coord.lat, coord.lng]);
+          
+          if (
+            this.estMarqueurSurPosition(
+              camion.position,
+              e.route.coordinates[e.route.coordinates.length - 1].lat,
+              e.route.coordinates[e.route.coordinates.length - 1].lng
+            )
+          ) {
+            camion.position.setIcon(this.icons.camionEau);
+          }
+        }, 150 * index);
+      });
+      console.log(caserne);
     },
   },
+  
 };
 </script>
 
