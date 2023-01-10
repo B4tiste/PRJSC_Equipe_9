@@ -44,8 +44,10 @@ export default {
   methods: {
     async chargementCentres() {
       try {
-        const response =await axios.get("http://176.191.15.114:8080/UrgenceManager/Centre/GetCenters?OnlyId=false");
-        const centres = await response.data;
+        // const response =await axios.get("http://176.191.15.114:9090/UrgenceManager/Centre/GetCenters?OnlyId=false");
+        // const centres = await response.data;
+        const response = await fetch("./data/centres.json")
+        const centres = await response.json()
         this.centres = centres;
       } catch (error) {
         console.error(error)
@@ -62,7 +64,7 @@ export default {
     },
     async chargementCapteurs() {
       try {
-        const response = await axios.get("http://176.191.15.114:8080/UrgenceManager/Capteur/GetCapteurs?OnlyId=false");
+        const response = await axios.get("http://176.191.15.114:9090/UrgenceManager/Capteur/GetCapteurs?OnlyId=false");
         const capteurs = await response.data;
         console.log(capteurs)
         this.capteurs = capteurs;

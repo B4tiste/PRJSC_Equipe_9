@@ -11,20 +11,26 @@ import TypeRessource from "./../enums/TypeRessource";
 export default {
   data() {
     return {
-      /** @type L.map */
+      /** @type {L.map} */
       map: null,
-      zoom: 14,
-      minZoom: 14,
-      maxZoom: 18,
-      /** @type array */
+      /** @type {L.layerControlFiltres} */
+      capteursLayer: null,
+      /** @type {L.layerControlFiltres} */
+      casernesLayer: null,
+      casernesInactivesLayer: null,
+      zoom: 15,
+      minZoom: 15,
+      maxZoom: 19,
+      /** @type {Number[]} */
       centre: [45.7766461124361, 4.884143173956448],
+      /** @type {Number[][]} */
       limitesCarte: [
         // en bas à gauche
         [45.71041155658168, 4.731144701943372],
         // en haut à droite
         [45.79843412950511, 4.948728755139855],
       ],
-      /** @type {L.icon}[] */
+      /** @type {L.icon[]} */
       icons: {
         blueIcon: L.icon({
           iconUrl:
@@ -70,14 +76,15 @@ export default {
           iconSize: [50, 50],
         }),
       },
-      coinsGrille: [
-        45.763823823027685, 4.8618173788693015, 45.79019363295949,
-        4.907187868645735,
-      ],
       centresFeatureCollection: [],
       caserneLaPlusProche: null,
+      /** @type L.marker[] */
       marqueursFeux: [],
+      /** @type L.marker[] */
       marqueursCasernes: [],
+      overlay: [],
+      layerControlFiltres: L.control.layers(),
+      layerControlRecentrer: L.control.layers(),
     };
   },
   props: {
@@ -104,6 +111,7 @@ export default {
   },
   mounted() {
     this.initMap();
+    this.initLayerControl();
   },
   methods: {
     initMap() {
@@ -185,29 +193,57 @@ export default {
       /** Création d'une collection de TurfPoint */
       this.centresFeatureCollection = turf.featureCollection([]);
 
+      this.casernesLayer = L.layerGroup().addTo(this.map);
+      this.casernesInactivesLayer = L.layerGroup().addTo(this.map);
+
       this.centres.forEach((centre) => {
         const turfPoint = turf.point([centre.latitude, centre.longitude]);
-        if (centre.isAvailable && centre.ressource.length !== 0) {
-          this.centresFeatureCollection.features.push(turfPoint);
-        }
 
-        /** Ressources associées */
+        /** @type {L.marker} */
         const caserneMarqueur = this.creationMarqueurCaserne(centre);
 
-        /** Ajout du marqueur */
-        caserneMarqueur.addTo(this.map);
-      });
-    },
-    initCapteurs() {
-      this.capteurs.forEach((capteur) => {
-        if (capteur.microcontrolleur.latitude !== null && capteur.microcontrolleur.longitude !== null) {
-          const marqueur = L.marker([capteur.microcontrolleur.latitude, capteur.microcontrolleur.longitude], {
-            icon: this.icons.sensor,
-          });
-          console.log(marqueur);
-          marqueur.addTo(this.map);
+        if (centre.isAvailable && centre.ressource.length !== 0) {
+          this.centresFeatureCollection.features.push(turfPoint);
+          this.casernesLayer.addLayer(caserneMarqueur);
+        } else {
+          this.casernesInactivesLayer.addLayer(caserneMarqueur);
         }
       });
+      this.layerControlFiltres.addOverlay(this.casernesLayer, "casernes");
+      this.layerControlFiltres.addOverlay(
+        this.casernesInactivesLayer,
+        "casernes inactives"
+      );
+    },
+    initCapteurs() {
+      this.capteursLayer = L.layerGroup().addTo(this.map);
+      this.porteeCapteurLayer = L.layerGroup().addTo(this.map);
+
+      this.capteurs.forEach((capteur) => {
+        if (
+          capteur.microcontrolleur.latitude !== null &&
+          capteur.microcontrolleur.longitude !== null
+        ) {
+          const marqueur = L.marker(
+            [
+              capteur.microcontrolleur.latitude,
+              capteur.microcontrolleur.longitude,
+            ],
+            {
+              icon: this.icons.sensor,
+            }
+          );
+          const cercle = L.circle(marqueur.getLatLng(), 350, {
+            color: "#7895B2",
+            fillColor: "#7895B2",
+            opacity: 0.05,
+          });
+          this.porteeCapteurLayer.addLayer(cercle);
+          this.capteursLayer.addLayer(marqueur);
+        }
+      });
+      this.layerControlFiltres.addOverlay(this.capteursLayer, "capteurs");
+      this.layerControlFiltres.addOverlay(this.porteeCapteurLayer, "portée");
     },
     /**
      * @param {L.Routing.RouteSelectedEvent} e
@@ -243,6 +279,7 @@ export default {
      * Ajout des urgences sur la map
      */
     initUrgences() {
+      this.urgencesLayer = L.layerGroup().addTo(this.map);
       this.urgences.forEach((urgence) => {
         const marqueur = L.marker(
           [urgence.incident.latitude, urgence.incident.longitude],
@@ -257,8 +294,13 @@ export default {
         marqueur.on("click", () => {
           this.trouveCheminLePlusProche(marqueur.getLatLng());
         });
-        marqueur.addTo(this.map);
+        this.urgencesLayer.addLayer(marqueur);
       });
+      this.layerControlFiltres.addOverlay(this.urgencesLayer, "urgences");
+    },
+    initLayerControl() {
+      this.layerControlFiltres.addTo(this.map);
+      this.layerControlRecentrer.addTo(this.map);
     },
     initIconFeu() {
       const tailleFeu = this.nombreAleatoire(20, 50);
@@ -427,5 +469,47 @@ export default {
 #map {
   width: 100%;
   height: 100%;
+}
+.localisation {
+    display: flex;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50px;
+    background-color: white;
+    z-index: 100;
+    cursor: pointer;
+    transition: 0.3s background-color;
+    right: 15px;
+    box-shadow: 0px 0px 8px 0px var(--manatee);
+}
+.localisation::after {
+    visibility: hidden;
+    background-color: var(--white-bg);
+    color: var(--indigo);
+    font-family: var(--font-family-title);
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px 20px;
+}
+.localisation {
+    bottom: 20px;
+}
+.localisation::after {
+    content: "Recentrer";
+    position: absolute;
+    top: 32px;
+    transform: translateY(-50%);
+    right:70px;
+}
+.localisation:hover::after {
+    visibility: visible;
+    transition:.3s;
+}
+.localisation:hover {
+    background-color: #e0e0e0;
+    transition: 0.3s background-color;
 }
 </style>
