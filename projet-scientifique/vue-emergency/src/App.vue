@@ -4,47 +4,48 @@
       id="map"
       :centres="centres"
       :urgences="urgences"
+      :capteurs="capteurs"
       @update:camions="onUpdateCamions"
     />
-    <RecapRessources
+    <!-- <RecapRessources
       id="recapRessources"
       :centres="centres"
       :urgences="urgences"
       :camions="camions"
-    />
+    /> -->
   </div>
 </template>
 
 <script>
 import EmergencyMap from "./components/EmergencyMap.vue";
-import RecapRessources from "./components/RecapRessources.vue";
+import axios from "axios";
 
 export default {
   name: "App",
   components: {
     EmergencyMap,
-    RecapRessources,
   },
   data() {
     return {
       centres: [],
       urgences: [],
       camions: [],
+      capteurs: []
     };
   },
   async created() {
     /** Chargement asynchrone des données depuis les json */
     await Promise.all([
-      this.chargementCentres(), this.chargementUrgences()
+      this.chargementCentres(), 
+      this.chargementUrgences(),
+      this.chargementCapteurs()
     ]);
   },
   methods: {
     async chargementCentres() {
       try {
-        // const response = await axios.get("");
-        const response = await fetch("./data/centres.json")
-        const centres = await response.json();
-        console.log(centres)
+        const response =await axios.get("http://176.191.15.114:8080/UrgenceManager/Centre/GetCenters?OnlyId=false");
+        const centres = await response.data;
         this.centres = centres;
       } catch (error) {
         console.error(error)
@@ -52,15 +53,22 @@ export default {
     },
     async chargementUrgences() {
       try {
-        // const response = await axios.get("");
         const response = await fetch("./data/urgences.json");
         const urgences = await response.json();
-          console.log(urgences)
         this.urgences = urgences;
       } catch (error) {
         console.error(error)
       }
-
+    },
+    async chargementCapteurs() {
+      try {
+        const response = await axios.get("http://176.191.15.114:8080/UrgenceManager/Capteur/GetCapteurs?OnlyId=false");
+        const capteurs = await response.data;
+        console.log(capteurs)
+        this.capteurs = capteurs;
+      } catch (error) {
+        console.error(error)
+      }
     },
     onUpdateCamions(camions) {
       this.camions = camions;
