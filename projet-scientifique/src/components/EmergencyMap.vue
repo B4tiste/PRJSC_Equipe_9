@@ -19,7 +19,7 @@ export default {
       casernesLayer: null,
       casernesInactivesLayer: null,
       zoom: 15,
-      minZoom: 15,
+      minZoom: 14,
       maxZoom: 19,
       /** @type {Number[]} */
       centre: [45.77698956668263, 4.885078028351652],
