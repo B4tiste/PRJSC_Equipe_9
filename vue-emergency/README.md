@@ -1,4 +1,6 @@
-# vue-emergency
+# Vue Emergency
+
+Partie vue emergency du projet scientifique
 
 ## Project setup
 ```
@@ -19,6 +21,3 @@ npm run build
 ```
 npm run lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
