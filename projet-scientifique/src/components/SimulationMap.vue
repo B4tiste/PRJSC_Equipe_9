@@ -14,12 +14,17 @@ export default {
     return {
       /** @type L.map */
       map: null,
+      /** @type {L.layerGroup} */
+      capteursLayer: null,
+      /** @type {L.layerGroup} */
+      casernesLayer: null,
+      /** @type {L.layerGroup} */
+      urgencesLayer: null,
       zoom: 14,
       minZoom: 14,
       maxZoom: 18,
       /** @type array */
-      centre: [45.7766461124361, 4.884143173956448],
-      capteurs: [],
+      centre: [45.77698956668263, 4.885078028351652],
       limitesCarte: [
         // en bas à gauche
         [45.71041155658168, 4.731144701943372],
@@ -28,20 +33,6 @@ export default {
       ],
       /** @type {L.icon}[] */
       icons: {
-        blueIcon: L.icon({
-          iconUrl:
-            "https://raw.githubusercontent.com/pointhi/leaflet-color-marqueurs/master/img/marqueur-icon-2x-blue.png",
-          iconSize: [20, 36],
-          iconAnchor: [0, 0],
-          popupAnchor: [0, 0],
-        }),
-        redIcon: L.icon({
-          iconUrl:
-            "https://raw.githubusercontent.com/pointhi/leaflet-color-marqueurs/master/img/marqueur-icon-2x-red.png",
-          iconSize: [8, 14],
-          iconAnchor: [0, 0],
-          popupAnchor: [0, 0],
-        }),
         sensor: L.icon({
           iconUrl: "./images/sensor.png",
           iconSize: [15, 15],
@@ -76,56 +67,48 @@ export default {
         4.907187868645735,
       ],
       capteurFeatureCollection: [],
-      grid: {},
       capteurActives: [],
       capteursMarqueurs: [],
-      sontTousActives: false,
-      nbCapteursMinimum: 3,
+      nbCapteursMinimum: 5,
       marqueursCasernes: [],
       incidentsPrisEnCompte: [],
+      overlay: [],
+      layerControlFiltres: L.control.layers(),
+      marqueursFeux: [],
+      routingLayers: [],
     };
   },
   props: {
-    marqueursFeu: {
-      type: Array,
-    },
     centres: {
       type: Array,
     },
+    capteurs: {
+      type: Array,
+    },
+    urgences: {
+      type: Array,
+    },
   },
-  beforeMount() {
-    this.grid = turf.pointGrid(this.coinsGrille, 500, {
-      units: "meters",
-    });
-  },
-  async mounted() {
+  mounted() {
     this.initMap();
-    this.initCapteurs();
+    this.initLayerControl();
 
-    this.capteurFeatureCollection = turf.featureCollection(this.capteurs);
+    setInterval(() => {
+      console.log("évolution du feu");
+      // Appel api pour l'état des feux
 
-    //this.findNearestPointOnClick(this.capteurFeatureCollection);
-    this.$emit("update:coinsGrille", this.coinsGrille);
+      this.updateUrgences();
+    }, 5000);
   },
   watch: {
-    marqueursFeu() {
-      this.marqueursFeu.forEach((marqueur) => {
-        if (!this.feuPrisEnCompte(marqueur)) {
-          this.incidentsPrisEnCompte.push(marqueur);
-          this.findNearestPoint([
-            marqueur.getLatLng().lat,
-            marqueur.getLatLng().lng,
-          ]);
-          marqueur.addTo(this.map);
-          /** Envoie des ressources */
-          setTimeout(() => {
-            this.envoyerRessources(marqueur.getLatLng());
-          }, 3000);
-        }
-      });
-    },
     centres() {
       this.initCentres();
+    },
+    capteurs() {
+      this.initCapteurs();
+    },
+    urgences() {
+      this.initUrgences();
     },
   },
   methods: {
@@ -175,6 +158,9 @@ export default {
         })
         .addTo(this.map);
     },
+    initLayerControl() {
+      this.layerControlFiltres.addTo(this.map);
+    },
     initRoutingLayer() {
       const routingLayer = L.routing.control({
         fitSelectedRoutes: false,
@@ -207,18 +193,33 @@ export default {
      * Méthode d'initialisation des capteurs
      */
     initCapteurs() {
-      var capteurs = [];
-
-      this.grid.features.forEach((capteur) => {
-        capteurs.push(turf.point(capteur.geometry.coordinates));
-        const marqueur = L.marker(capteur.geometry.coordinates, {
-          icon: this.icons.sensor,
-        });
-
-        this.capteursMarqueurs.push(marqueur);
-        marqueur.addTo(this.map);
+      this.capteursLayer = L.layerGroup().addTo(this.map);
+      this.capteurs.forEach((capteur) => {
+        const objetCapteur = this.initIconCapteur(capteur);
+        if (
+          capteur.microcontrolleur.latitude !== null &&
+          capteur.microcontrolleur.longitude !== null
+        ) {
+          const marqueur = L.marker(
+            [
+              capteur.microcontrolleur.latitude,
+              capteur.microcontrolleur.longitude,
+            ],
+            {
+              icon: objetCapteur.icon,
+            }
+          );
+          const cercle = L.circle(marqueur.getLatLng(), 350, {
+            color: "#7895B2",
+            fillColor: "#7895B2",
+            opacity: 0.05,
+          });
+          this.capteursLayer.addLayer(objetCapteur.cercleIntensite);
+          this.capteursLayer.addLayer(cercle);
+          this.capteursLayer.addLayer(marqueur);
+        }
       });
-      this.capteurs = capteurs;
+      this.layerControlFiltres.addOverlay(this.capteursLayer, "capteurs");
     },
     initCentres() {
       /** Création d'une collection de TurfPoint */
@@ -234,17 +235,86 @@ export default {
         caserneMarqueur.addTo(this.map);
       });
     },
-    creationTooltipCaserne(caserne, nbCamions = 0, nbPompiers = 0) {
-      const adresse = caserne.adresse;
-      return `<div>
-          <h3>${caserne.nom}</h3>
-          <p>
-            ${adresse.rue}  
-          </p>
-          <p>${nbCamions} camions disponibles</p>
-          <p>${nbPompiers} pompiers disponibles</p>
-        </div>
-      `;
+    initUrgences() {
+      this.urgencesLayer = L.layerGroup().addTo(this.map);
+      this.urgences.forEach((urgence) => {
+        const objetFeu = this.initIconFeu(urgence.incident);
+        const marqueur = L.marker(
+          [urgence.incident.latitude, urgence.incident.longitude],
+          {
+            icon: objetFeu.icon,
+          }
+        );
+        this.marqueursFeux.push(marqueur);
+
+        if (!this.feuPrisEnCompte(marqueur)) {
+          this.incidentsPrisEnCompte.push(marqueur);
+
+          this.trouveCheminLePlusProche(marqueur.getLatLng(), urgence);
+        }
+
+        this.urgencesLayer.addLayer(objetFeu.cercleFeu);
+        this.urgencesLayer.addLayer(marqueur);
+      });
+      this.layerControlFiltres.addOverlay(this.urgencesLayer, "urgences");
+    },
+    initIconFeu(incident) {
+      return {
+        cercleFeu: L.circle(
+          [incident.latitude, incident.longitude],
+          incident.radius * 2000,
+          {
+            color: "red",
+            fillColor: "red",
+            opacity: 0.5,
+          }
+        ),
+        icon: L.icon({
+          iconUrl: "./images/feu.png",
+          iconSize: [15, 15],
+        }),
+      };
+    },
+    initIconCapteur(capteur) {
+      if (capteur.capteurDonnees[0].valeur !== 0) {
+        return {
+          cercleIntensite: L.circle(
+            [
+              capteur.microcontrolleur.latitude,
+              capteur.microcontrolleur.longitude,
+            ],
+            0,
+            {
+              color: "#32DE8A",
+              fillColor: "#32DE8A",
+              opacity: 0.5,
+            }
+          ),
+          icon: L.icon({
+            iconUrl: "./images/sensor.png",
+            iconSize: [15, 15],
+          }),
+        };
+      } else {
+        return {
+          cercleIntensite: L.circle(
+            [
+              capteur.microcontrolleur.latitude,
+              capteur.microcontrolleur.longitude,
+            ],
+            capteur.radius * 2,
+            {
+              color: "#32DE8A",
+              fillColor: "#32DE8A",
+              opacity: 0.5,
+            }
+          ),
+          icon: L.icon({
+            iconUrl: "./images/sensor-activated.png",
+            iconSize: [15, 15],
+          }),
+        };
+      }
     },
     /**
      * @param {Object} caserne
@@ -252,33 +322,16 @@ export default {
     creationMarqueurCaserne(caserne) {
       var marqueur = {};
       if (caserne.isAvailable && caserne.ressource.length !== 0) {
-        const ressources = this.compteRessourcesDisponibles(caserne);
         marqueur = L.marker([caserne.latitude, caserne.longitude], {
           icon: this.icons.caserne,
-        }).bindTooltip(
-          this.creationTooltipCaserne(
-            caserne,
-            ressources.nbCamions,
-            ressources.nbPompiers
-          )
-        );
+        });
       } else {
         marqueur = L.marker([caserne.latitude, caserne.longitude], {
           icon: this.icons.caserneInactive,
-        }).bindTooltip(this.creationTooltipCaserne(caserne));
+        });
       }
       this.marqueursCasernes.push(marqueur);
       return marqueur;
-    },
-    supprimerElementDeCaserneCollection(caserne, index) {
-      this.centresFeatureCollection.features.forEach((feature) => {
-        if (
-          caserne.latitude === feature.geometry.coordinates[0] &&
-          caserne.longitude === feature.geometry.coordinates[1]
-        ) {
-          this.centresFeatureCollection.features.splice(index, 1);
-        }
-      });
     },
     /**
      * @param {Object} caserne
@@ -306,200 +359,46 @@ export default {
       });
       return nbPersonnes;
     },
-    /**
-     * Trouve le point le plus proche du click
-     */
-    findNearestPoint(point) {
-      const turfPoint = turf.point([point[0], point[1]]);
-
-      var tempCapteurFeatureCollection = this.capteurFeatureCollection;
-      var tempcapteursMarqueurs = this.capteursMarqueurs;
-
-      for (var i = 0; i < this.nbCapteursMinimum; i++) {
-        if (tempCapteurFeatureCollection.features.length !== 0) {
-          const nearest = turf.nearestPoint(
-            turfPoint,
-            tempCapteurFeatureCollection
-          );
-
-          if (!this.verifieCapteurDejaActif(nearest)) {
-            this.capteurActives.push(nearest.geometry);
-
-            const index = this.findIndexOfMarqueur(
-              nearest,
-              tempCapteurFeatureCollection
-            );
-
-            if (index !== -1) {
-              const marqueur = tempcapteursMarqueurs[index];
-
-              tempCapteurFeatureCollection.features.splice(index, 1);
-              tempcapteursMarqueurs.splice(index, 1);
-
-              this.map.removeLayer(marqueur);
-
-              L.marker(nearest.geometry.coordinates, {
-                icon: this.icons.sensorActivate,
-              }).addTo(this.map);
-            }
-          }
-        }
-      }
-    },
-    findNearestPointOnClick() {
-      this.map.on("click", (e) => {
-        const coord = e.latlng;
-        const turfPoint = turf.point([coord.lat, coord.lng]);
-
-        var tempCapteurFeatureCollection = this.capteurFeatureCollection;
-        var tempcapteursMarqueurs = this.capteursMarqueurs;
-
-        for (var i = 0; i < this.nbCapteursMinimum; i++) {
-          if (tempCapteurFeatureCollection.features.length !== 0) {
-            const nearest = turf.nearestPoint(
-              turfPoint,
-              tempCapteurFeatureCollection
-            );
-
-            if (!this.verifieCapteurDejaActif(nearest)) {
-              this.capteurActives.push(nearest.geometry);
-
-              const index = this.findIndexOfMarqueur(
-                nearest,
-                tempCapteurFeatureCollection
-              );
-
-              if (index !== -1) {
-                const marqueur = tempcapteursMarqueurs[index];
-
-                tempCapteurFeatureCollection.features.splice(index, 1);
-                tempcapteursMarqueurs.splice(index, 1);
-
-                this.map.removeLayer(marqueur);
-
-                L.marker(nearest.geometry.coordinates, {
-                  icon: this.icons.sensorActivate,
-                }).addTo(this.map);
-              }
-            }
-          }
-        }
-      });
-    },
-    /**
-     * Trouve l'index du point le plus proche dans le tableau capteurFeatureCollection
-     * @param {turf.point} nearest
-     * @param {turf.featureCollection} capteurFeatureCollection
-     */
-    findIndexOfMarqueur(nearest, tableau) {
-      for (var i = 0; i < tableau.features.length; i++) {
-        const capteur = tableau.features[i].geometry.coordinates;
-        if (
-          capteur[0] === nearest.geometry.coordinates[0] &&
-          capteur[1] === nearest.geometry.coordinates[1]
-        ) {
-          return i;
-        }
-      }
-      return -1;
-    },
-    /**
-     * Vérifie si un capteur est déjà actif pour éviter de recréer le marqueur
-     * @param {turf.point} nearest
-     */
-    verifieCapteurDejaActif(nearest) {
-      if (this.capteurActives.length != 0) {
-        var estActif = false;
-        this.capteurActives.forEach((capteur) => {
-          if (
-            capteur.coordinates[0] === nearest.geometry.coordinates[0] &&
-            capteur.coordinates[1] === nearest.geometry.coordinates[1]
-          ) {
-            estActif = true;
-          }
-        });
-
-        if (estActif) {
-          return true;
-        }
-      } else {
-        return false;
-      }
-    },
-    envoyerRessources(coordonnees) {
-      this.trouveCheminLePlusProche(coordonnees);
-    },
     feuPrisEnCompte(marqueur) {
       if (this.incidentsPrisEnCompte.length === 0) {
         return false;
       }
-      var estTrouve = false;
 
-      this.incidentsPrisEnCompte.forEach((incident) => {
+      return this.incidentsPrisEnCompte.forEach((incident) => {
         if (
           incident.getLatLng().lat === marqueur.getLatLng().lat &&
           incident.getLatLng().lng === marqueur.getLatLng().lng
         ) {
-          estTrouve = true;
+          return true;
         }
       });
-
-      return estTrouve;
     },
     /**
      * @param {Number[]} coordonnes
      */
-    trouveCheminLePlusProche(coordonnes) {
-      // TODO gérer les récupérations de données par rapport à l'id de la caserne
-      const turfPoint = turf.point([coordonnes.lat, coordonnes.lng]);
-      try {
-        const caserneLaPlusProche = turf.nearestPoint(
-          turfPoint,
-          this.centresFeatureCollection
-        );
-        const waypoints = [
-          L.latLng(
-            caserneLaPlusProche.geometry.coordinates[0],
-            caserneLaPlusProche.geometry.coordinates[1]
-          ),
-          L.latLng(coordonnes.lat, coordonnes.lng),
-        ];
-        const routingLayer = this.initRoutingLayer();
-
-        /** Ecoute de l'évènement "routeselected" */
-        routingLayer.on("routeselected", (e) => {
-          this.onRouteSelectedEvent(e);
-        });
-
-        /** Retire une ressource à la caserne */
-        this.trouveCentre(caserneLaPlusProche);
-
-        this.ajouteRouteSurMap(routingLayer, waypoints);
-      } catch (error) {
-        console.warn(error);
-        console.warn("Aucune caserne à disponibilité");
-      }
-    },
-    trouveCentre(coordonnees) {
-      this.centres.forEach((centre) => {
-        if (
-          centre.latitude == coordonnees.geometry.coordinates[0] &&
-          centre.longitude == coordonnees.geometry.coordinates[1]
-        ) {
-          centre.ressource.shift();
-          centre.ressourceId.shift();
-
-          // Suppression de la caserne dans la collection
-          if (centre.ressource.length === 0) {
-            this.supprimerElementDeCaserneCollection(centre);
+    trouveCheminLePlusProche(coordonnes, urgence) {
+      urgence.ressources.forEach((vehicule, index) => {
+        setTimeout(() => {
+          try {
+            const waypoints = [
+              L.latLng(vehicule.centre.latitude, vehicule.centre.longitude),
+              L.latLng(coordonnes.lat, coordonnes.lng),
+            ];
+            const routingLayer = this.initRoutingLayer();
+            /** Ecoute de l'évènement "routeselected" */
+            routingLayer.on("routeselected", (e) => {
+              this.onRouteSelectedEvent(e, routingLayer);
+            });
+            this.routingLayers.push({
+              id: urgence.incidentId,
+              routingLayer: routingLayer,
+            });
+            this.ajouteRouteSurMap(routingLayer, waypoints);
+          } catch (error) {
+            console.warn(error);
+            console.warn("Aucune caserne à disponibilité");
           }
-
-          const caserneMarqueur = this.trouveMarqueurCaserne(centre);
-          this.miseAJourMarqueurCaserne(caserneMarqueur, centre);
-
-          /** Ajout du marqueur */
-          caserneMarqueur.addTo(this.map);
-        }
+        }, 1000 * index);
       });
     },
     trouveMarqueurCaserne(caserne) {
@@ -515,7 +414,6 @@ export default {
       return marqueur;
     },
     miseAJourMarqueurCaserne(marqueur, centre) {
-      console.log(marqueur);
       // On supprime l'ancien marqueur
       this.map.removeLayer(marqueur);
 
@@ -531,7 +429,7 @@ export default {
     /**
      * @param {L.Routing.RouteSelectedEvent} e
      */
-    onRouteSelectedEvent(e) {
+    onRouteSelectedEvent(e, routingLayer) {
       /** Envoie des ressources */
       var camion = {
         position: L.marker(e.route.coordinates[0], {
@@ -543,7 +441,7 @@ export default {
       e.route.coordinates.forEach((coord, index) => {
         setTimeout(() => {
           camion.position.setLatLng([coord.lat, coord.lng]);
-
+          console.log("Mise à jour coordonées", camion)
           if (
             this.estMarqueurSurPosition(
               camion.position,
@@ -552,8 +450,9 @@ export default {
             )
           ) {
             camion.position.setIcon(this.icons.camionEau);
+            this.map.removeControl(routingLayer);
           }
-        }, 200 * index);
+        }, 300 * index);
       });
     },
     /**
@@ -566,6 +465,9 @@ export default {
         marqueur.getLatLng().lat === lat && marqueur.getLatLng().lng === lng
       );
     },
+    updateUrgences() {
+      console.log(this.urgencesLayer)
+    }
   },
 };
 </script>

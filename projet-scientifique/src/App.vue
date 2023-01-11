@@ -1,61 +1,79 @@
 <template>
   <div class="content">
-    <div class="menu-container">
-      <RecapSimulation id="menu" />
-      <Simulation
-        id="simulation"
-        :coinsGrille="coinsGrille"
-        @update:marqueursFeu="onMarqueursFeuChange"
-      />
-    </div>
     <div class="map-container">
-      <SimulationMap
-        :centres="centres"
-        :marqueursFeu="marqueursFeu"
-        @update:coinsGrille="onCoinsGrilleChange"
+      <SimulationMap 
+        :centres="centres" 
+        :capteurs="capteurs"
+        :urgences="urgences"  
       />
     </div>
+    <Loader :chargement="chargement" />
   </div>
 </template>
 
 <script>
 import SimulationMap from "./components/SimulationMap.vue";
-import RecapSimulation from "./components/RecapSimulation.vue";
-import Simulation from "./components/Simulation.vue";
+import Loader from "./components/Loader.vue";
+import axios from "axios";
 
 export default {
   name: "App",
   components: {
     SimulationMap,
-    RecapSimulation,
-    Simulation,
+    Loader,
   },
   data() {
     return {
-      coinsGrille: null,
-      marqueursFeu: null,
-      centres: null
+      capteurs: null,
+      urgences: null,
+      centres: null,
+      adresseIp: "192.168.109.139",
+      chargement: true
     };
   },
   async created() {
-    await Promise.all([this.chargementCentres()])
+    await Promise.all([
+      this.chargementCentres(),
+      this.chargementCapteurs(),
+      this.chargementUrgences()
+    ]).then(() => {
+      this.chargement = false
+    });
   },
   methods: {
     async chargementCentres() {
       try {
-        const response = await fetch("./data/centres.json");
-        const centres = await response.json();
+        const response = await axios.get(
+          `http://${this.adresseIp}:9090/UrgenceManager/Centre/GetCenters?OnlyId=false`
+        );
+        const centres = response.data;
         this.centres = centres;
       } catch (error) {
         console.error(error);
       }
     },
-    onCoinsGrilleChange(coinsGrille) {
-      this.coinsGrille = coinsGrille;
+    async chargementCapteurs() {
+      try {
+        const response = await axios.get(
+          `http://${this.adresseIp}:9090/UrgenceManager/Capteur/GetCapteurs?OnlyId=false`
+        );
+        const capteurs = await response.data;
+        this.capteurs = capteurs;
+      } catch (error) {
+        console.error(error);
+      }
     },
-    onMarqueursFeuChange(marqueursFeu) {
-      this.marqueursFeu = [...marqueursFeu];
-    }
+    async chargementUrgences() {
+      try {
+        const response = await axios.get(
+          `http://${this.adresseIp}:9090/UrgenceManager/Urgence/GetUrgencies?OnlyId=false`
+        );
+        const urgences = await response.data;
+        this.urgences = urgences;
+      } catch (error) {
+        console.error(error);
+      }
+    },
   },
 };
 </script>
@@ -86,8 +104,9 @@ export default {
 }
 
 .map-container {
-  width: 80%;
+  width: 100%;
   height: 100%;
+  z-index: 1;
 }
 
 .menu-container {
