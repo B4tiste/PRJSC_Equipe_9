@@ -170,7 +170,7 @@ export default {
         draggableWaypoints: false,
         waypointMode: "connect",
         useZoomParameter: false,
-        showAlternatives: true,
+        showAlternatives: false,
         addWaypoints: false,
         allowUTurn: true,
         lineOptions: {
@@ -217,7 +217,6 @@ export default {
     },
     initCapteurs() {
       this.capteursLayer = L.layerGroup().addTo(this.map);
-      this.porteeCapteurLayer = L.layerGroup().addTo(this.map);
 
       this.capteurs.forEach((capteur) => {
         if (
@@ -238,17 +237,17 @@ export default {
             fillColor: "#7895B2",
             opacity: 0.05,
           });
-          this.porteeCapteurLayer.addLayer(cercle);
+          this.capteursLayer.addLayer(cercle);
           this.capteursLayer.addLayer(marqueur);
         }
       });
       this.layerControlFiltres.addOverlay(this.capteursLayer, "capteurs");
-      this.layerControlFiltres.addOverlay(this.porteeCapteurLayer, "portée");
     },
     /**
      * @param {L.Routing.RouteSelectedEvent} e
      */
     onRouteSelectedEvent(e) {
+      // TODO faire appels api pour l'envoie des ressources
       /** Envoie des ressources */
       var camion = {
         position: L.marker(e.route.coordinates[0], {
@@ -270,29 +269,29 @@ export default {
           ) {
             camion.position.setIcon(this.icons.camionEau);
           }
-        }, 150 * index);
+        }, 300 * index);
       });
     },
-
     /**
      * Ajout des urgences sur la map
      */
     initUrgences() {
       this.urgencesLayer = L.layerGroup().addTo(this.map);
       this.urgences.forEach((urgence) => {
+        const objetFeu = this.initIconFeu(urgence.incident)
         const marqueur = L.marker(
           [urgence.incident.latitude, urgence.incident.longitude],
           {
-            icon: this.initIconFeu(),
+            icon: objetFeu.icon,
           }
         );
-
         this.marqueursFeux.push(marqueur);
 
         /** Recherche du chemin vers le centre la plus proche */
         marqueur.on("click", () => {
-          this.trouveCheminLePlusProche(marqueur.getLatLng());
+          this.trouveCheminLePlusProche(marqueur.getLatLng(), urgence);
         });
+        this.urgencesLayer.addLayer(objetFeu.cercleFeu);
         this.urgencesLayer.addLayer(marqueur);
       });
       this.layerControlFiltres.addOverlay(this.urgencesLayer, "urgences");
@@ -300,13 +299,22 @@ export default {
     initLayerControl() {
       this.layerControlFiltres.addTo(this.map);
     },
-    initIconFeu() {
-      const tailleFeu = this.nombreAleatoire(20, 50);
-
-      return L.icon({
-        iconUrl: "./images/feu.png",
-        iconSize: [tailleFeu, tailleFeu],
-      });
+    initIconFeu(incident) {
+      return {
+        cercleFeu: L.circle(
+          [incident.latitude, incident.longitude],
+          incident.radius * 2000,
+          {
+            color: "red",
+            fillColor: "red",
+            opacity: 0.5,
+          }
+        ),
+        icon: L.icon({
+          iconUrl: "./images/feu.png",
+          iconSize: [15, 15],
+        }),
+      };
     },
     /**
      * @param {Object} caserne
@@ -397,35 +405,27 @@ export default {
     /**
      * @param {Number[]} coordonnes
      */
-    trouveCheminLePlusProche(coordonnes) {
-      // TODO gérer les récupérations de données par rapport à l'id de la caserne
-      const turfPoint = turf.point([coordonnes.lat, coordonnes.lng]);
-      try {
-        const caserneLaPlusProche = turf.nearestPoint(
-          turfPoint,
-          this.centresFeatureCollection
-        );
+    trouveCheminLePlusProche(coordonnes, urgence) {
+      urgence.ressources.forEach((vehicule) => {
+        try {
+          const waypoints = [
+            L.latLng(vehicule.centre.latitude, vehicule.centre.longitude),
+            L.latLng(coordonnes.lat, coordonnes.lng),
+          ];
 
-        const waypoints = [
-          L.latLng(
-            caserneLaPlusProche.geometry.coordinates[0],
-            caserneLaPlusProche.geometry.coordinates[1]
-          ),
-          L.latLng(coordonnes.lat, coordonnes.lng),
-        ];
+          const routingLayer = this.initRoutingLayer();
 
-        const routingLayer = this.initRoutingLayer();
+          /** Ecoute de l'évènement "routeselected" */
+          routingLayer.on("routeselected", (e) => {
+            this.onRouteSelectedEvent(e);
+          });
 
-        /** Ecoute de l'évènement "routeselected" */
-        routingLayer.on("routeselected", (e) => {
-          this.onRouteSelectedEvent(e);
-        });
-
-        this.ajouteRouteSurMap(routingLayer, waypoints);
-      } catch (error) {
-        console.warn(error);
-        console.warn("Aucune caserne à disponibilité");
-      }
+          this.ajouteRouteSurMap(routingLayer, waypoints);
+        } catch (error) {
+          console.warn(error);
+          console.warn("Aucune caserne à disponibilité");
+        }
+      });
     },
     ajouteRouteSurMap(routingLayer, waypoints) {
       routingLayer.setWaypoints(waypoints);
@@ -460,46 +460,52 @@ export default {
   width: 100%;
   height: 100%;
 }
+
 .localisation {
-    display: flex;
-    position: absolute;
-    justify-content: center;
-    align-items: center;
-    width: 64px;
-    height: 64px;
-    border-radius: 50px;
-    background-color: white;
-    z-index: 100;
-    cursor: pointer;
-    transition: 0.3s background-color;
-    right: 15px;
-    box-shadow: 0px 0px 8px 0px var(--manatee);
+  display: flex;
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50px;
+  background-color: white;
+  z-index: 100;
+  cursor: pointer;
+  transition: 0.3s background-color;
+  right: 15px;
+  box-shadow: 0px 0px 8px 0px var(--manatee);
 }
+
 .localisation::after {
-    visibility: hidden;
-    background-color: var(--white-bg);
-    color: var(--indigo);
-    font-family: var(--font-family-title);
-    font-size: 14px;
-    font-weight: bold;
-    padding: 5px 20px;
+  visibility: hidden;
+  background-color: var(--white-bg);
+  color: var(--indigo);
+  font-family: var(--font-family-title);
+  font-size: 14px;
+  font-weight: bold;
+  padding: 5px 20px;
 }
+
 .localisation {
-    bottom: 20px;
+  bottom: 20px;
 }
+
 .localisation::after {
-    content: "Recentrer";
-    position: absolute;
-    top: 32px;
-    transform: translateY(-50%);
-    right:70px;
+  content: "Recentrer";
+  position: absolute;
+  top: 32px;
+  transform: translateY(-50%);
+  right: 70px;
 }
+
 .localisation:hover::after {
-    visibility: visible;
-    transition:.3s;
+  visibility: visible;
+  transition: 0.3s;
 }
+
 .localisation:hover {
-    background-color: #e0e0e0;
-    transition: 0.3s background-color;
+  background-color: #e0e0e0;
+  transition: 0.3s background-color;
 }
 </style>

@@ -13,17 +13,20 @@
       :urgences="urgences"
       :camions="camions"
     /> -->
+    <Loader :chargement="chargement" />
   </div>
 </template>
 
 <script>
 import EmergencyMap from "./components/EmergencyMap.vue";
+import Loader from "./components/Loader.vue";
 import axios from "axios";
 
 export default {
   name: "App",
   components: {
     EmergencyMap,
+    Loader
   },
   data() {
     return {
@@ -31,50 +34,59 @@ export default {
       urgences: [],
       camions: [],
       capteurs: [],
-      adresseIp: "192.168.109.139"
+      adresseIp: "192.168.109.139",
+      chargement: true
     };
   },
   async created() {
     /** Chargement asynchrone des données depuis les json */
     await Promise.all([
-      this.chargementCentres(), 
+      this.chargementCentres(),
       this.chargementUrgences(),
-      this.chargementCapteurs()
-    ]);
+      this.chargementCapteurs(),
+    ]).then(() => {
+      this.chargement = false;
+    });
+
   },
   methods: {
     async chargementCentres() {
       try {
-        const response =await axios.get(`http://${this.adresseIp}:9090/UrgenceManager/Centre/GetCenters?OnlyId=false`);
+        const response = await axios.get(
+          `http://${this.adresseIp}:9090/UrgenceManager/Centre/GetCenters?OnlyId=false`
+        );
         const centres = await response.data;
         this.centres = centres;
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
     },
     async chargementUrgences() {
       try {
-        const response = await axios.get(`http://${this.adresseIp}:9090/UrgenceManager/Urgence/GetUrgencies?OnlyId=false`)
-        const urgences = await response.data
-        console.log(urgences)
+        const response = await axios.get(
+          `http://${this.adresseIp}:9090/UrgenceManager/Urgence/GetUrgencies?OnlyId=false`
+        );
+        const urgences = await response.data;
         this.urgences = urgences;
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
     },
     async chargementCapteurs() {
       try {
-        const response = await axios.get(`http://${this.adresseIp}:9090/UrgenceManager/Capteur/GetCapteurs?OnlyId=false`);
+        const response = await axios.get(
+          `http://${this.adresseIp}:9090/UrgenceManager/Capteur/GetCapteurs?OnlyId=false`
+        );
         const capteurs = await response.data;
-        console.log(capteurs)
+        console.log(capteurs);
         this.capteurs = capteurs;
       } catch (error) {
-        console.error(error)
+        console.error(error);
       }
     },
     onUpdateCamions(camions) {
       this.camions = camions;
-    }
+    },
   },
 };
 </script>
@@ -108,6 +120,7 @@ export default {
 #map {
   width: calc(100% * (3 / 4));
   height: 100%;
+  z-index: 10;
 }
 
 #recapRessources {
