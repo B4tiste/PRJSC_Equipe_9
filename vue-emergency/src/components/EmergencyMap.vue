@@ -87,6 +87,8 @@ export default {
       overlay: [],
       layerControlFiltres: L.control.layers(),
       layerControlRecentrer: L.control.layers(),
+      camionsEnRoute: [],
+      cptCamions: 0
     };
   },
   props: {
@@ -126,12 +128,36 @@ export default {
         this.updateCapteurs();
       }
     },
+    cptCamions() {
+      if (this.cptCamions === this.camionsEnRoute.length) {
+        // lancer la suppression des feux
+        console.log("supression des feux")
+        this.supprimerFeux();
+      }
+    }
   },
   mounted() {
     this.initMap();
     this.initLayerControl();
+
+    setTimeout(()=>{
+      this.supprimerFeux()
+    }, 50000)
   },
   methods: {
+    supprimerFeux() {
+      this.urgencesLayer.eachLayer((feu) => {
+        this.camionsEnRoute.forEach((camion) => {
+          if (feu instanceof L.Marker) {
+
+            if (camion.getLatLng().lat == feu.getLatLng().lat
+            && camion.getLatLng().lon == feu.getLatLng().lng) {
+              this.urgencesLayer.removeLayer(feu);
+            }
+          }
+        })
+      })
+    },
     initMap() {
       const credits =
         /* html */
@@ -270,19 +296,11 @@ export default {
             /** Microcontrolleur KO */
             this.capteursLayer.removeLayer(layer);
           }
-          if (layer instanceof L.Circle) {
-            // layer.setStyle({
-            //   color: "red",
-            //   fillColor: "#f03",
-            //   fillOpacity: 0.5,
-            //   radius: 0,
-            // });
-          }
       });
       })
     },
     updateUrgences() {
-      
+      console.log("Mise à jour urgences");
     },
     /**
      * @param {L.Routing.RouteSelectedEvent} e
@@ -308,9 +326,10 @@ export default {
               e.route.coordinates[e.route.coordinates.length - 1].lng
             )
           ) {
+            this.cptCamions+=1;
             camion.position.setIcon(this.icons.camionEau);
           }
-        }, 300 * index);
+        }, 150 * index);
       });
     },
     /**
@@ -484,7 +503,10 @@ export default {
           ];
 
           const routingLayer = this.initRoutingLayer();
-
+          this.camionsEnRoute.push({
+            incidentID: urgence.incident.id,
+            vehicule: vehicule
+          })
           /** Ecoute de l'évènement "routeselected" */
           routingLayer.on("routeselected", (e) => {
             this.onRouteSelectedEvent(e);

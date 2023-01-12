@@ -36,7 +36,7 @@ export default {
       urgences: [],
       camions: [],
       capteurs: [],
-      adresseIp: "192.168.157.139",
+      adresseIp: "172.20.10.2",
       port: "9090",
       chargement: true
     };
@@ -53,12 +53,12 @@ export default {
 
   },
   async mounted() {
-    setInterval(async () => {
-      await Promise.all([
-        this.chargementCapteurs(),
-        this.chargementUrgences()
-      ])
-    }, 10000)
+    // setInterval(async () => {
+    //   await Promise.all([
+    //     this.chargementCapteurs(),
+    //     this.chargementUrgences()
+    //   ])
+    // }, 10000)
 
   },
   methods: {
