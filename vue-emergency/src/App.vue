@@ -5,6 +5,8 @@
       :centres="centres"
       :urgences="urgences"
       :capteurs="capteurs"
+      :adresseIp="adresseIp"
+      :port="port"
       @update:camions="onUpdateCamions"
     />
     <!-- <RecapRessources
@@ -34,7 +36,8 @@ export default {
       urgences: [],
       camions: [],
       capteurs: [],
-      adresseIp: "192.168.109.139",
+      adresseIp: "192.168.157.139",
+      port: "9090",
       chargement: true
     };
   },
@@ -49,11 +52,20 @@ export default {
     });
 
   },
+  async mounted() {
+    setInterval(async () => {
+      await Promise.all([
+        this.chargementCapteurs(),
+        this.chargementUrgences()
+      ])
+    }, 10000)
+
+  },
   methods: {
     async chargementCentres() {
       try {
         const response = await axios.get(
-          `http://${this.adresseIp}:9090/UrgenceManager/Centre/GetCenters?OnlyId=false`
+          `http://${this.adresseIp}:${this.port}/UrgenceManager/Centre/GetCenters?OnlyId=false`
         );
         const centres = await response.data;
         this.centres = centres;
@@ -64,7 +76,7 @@ export default {
     async chargementUrgences() {
       try {
         const response = await axios.get(
-          `http://${this.adresseIp}:9090/UrgenceManager/Urgence/GetUrgencies?OnlyId=false`
+          `http://${this.adresseIp}:${this.port}/UrgenceManager/Urgence/GetUrgencies?OnlyId=false`
         );
         const urgences = await response.data;
         this.urgences = urgences;
@@ -75,10 +87,9 @@ export default {
     async chargementCapteurs() {
       try {
         const response = await axios.get(
-          `http://${this.adresseIp}:9090/UrgenceManager/Capteur/GetCapteurs?OnlyId=false`
+          `http://${this.adresseIp}:${this.port}/UrgenceManager/Capteur/GetCapteurs?OnlyId=false`
         );
         const capteurs = await response.data;
-        console.log(capteurs);
         this.capteurs = capteurs;
       } catch (error) {
         console.error(error);

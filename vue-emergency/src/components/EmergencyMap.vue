@@ -13,13 +13,15 @@ export default {
     return {
       /** @type {L.map} */
       map: null,
-      /** @type {L.layerControlFiltres} */
+      /** @type {L.layerGroup} */
       capteursLayer: null,
-      /** @type {L.layerControlFiltres} */
+      /** @type {L.layerGroup} */
       casernesLayer: null,
+      /** @type {L.layerGroup} */
+      urgencesLayer: null,
       casernesInactivesLayer: null,
       zoom: 15,
-      minZoom: 14,
+      minZoom: 10,
       maxZoom: 19,
       /** @type {Number[]} */
       centre: [45.77698956668263, 4.885078028351652],
@@ -97,16 +99,32 @@ export default {
     capteurs: {
       type: Array,
     },
+    adresseIp: {
+      type: String,
+      require: true,
+    },
+    port: {
+      type: String,
+      require: true,
+    },
   },
   watch: {
     centres() {
       this.initCentres();
     },
     urgences() {
-      this.initUrgences();
+      if (this.urgencesLayer === null) {
+        this.initUrgences();
+      } else {
+        this.updateUrgences();
+      }
     },
     capteurs() {
-      this.initCapteurs();
+      if (this.capteursLayer === null) {
+        this.initCapteurs();
+      } else {
+        this.updateCapteurs();
+      }
     },
   },
   mounted() {
@@ -174,7 +192,7 @@ export default {
         addWaypoints: false,
         allowUTurn: true,
         lineOptions: {
-          styles: [{ color: "red", opacity: 1, weight: 2 }],
+          styles: [{ color: "#731DD8", opacity: 1, weight: 2 }],
           missingRouteTolerance: 0,
           extendToWaypoints: false,
         },
@@ -217,8 +235,8 @@ export default {
     },
     initCapteurs() {
       this.capteursLayer = L.layerGroup().addTo(this.map);
-
       this.capteurs.forEach((capteur) => {
+        const objetCapteur = this.initIconCapteur(capteur);
         if (
           capteur.microcontrolleur.latitude !== null &&
           capteur.microcontrolleur.longitude !== null
@@ -229,19 +247,42 @@ export default {
               capteur.microcontrolleur.longitude,
             ],
             {
-              icon: this.icons.sensor,
+              icon: objetCapteur.icon,
             }
           );
           const cercle = L.circle(marqueur.getLatLng(), 350, {
             color: "#7895B2",
             fillColor: "#7895B2",
-            opacity: 0.05,
+            opacity: 0.01,
           });
+          // this.capteursLayer.addLayer(objetCapteur.cercleIntensite);
           this.capteursLayer.addLayer(cercle);
           this.capteursLayer.addLayer(marqueur);
         }
       });
       this.layerControlFiltres.addOverlay(this.capteursLayer, "capteurs");
+    },
+    updateCapteurs() {
+      console.log("Mise à jour capteur");
+      this.capteurs.forEach((capteur) => {
+        this.capteursLayer.eachLayer((layer) => {
+          if (capteur.microcontrolleur.etat === 1) {
+            /** Microcontrolleur KO */
+            this.capteursLayer.removeLayer(layer);
+          }
+          if (layer instanceof L.Circle) {
+            // layer.setStyle({
+            //   color: "red",
+            //   fillColor: "#f03",
+            //   fillOpacity: 0.5,
+            //   radius: 0,
+            // });
+          }
+      });
+      })
+    },
+    updateUrgences() {
+      
     },
     /**
      * @param {L.Routing.RouteSelectedEvent} e
@@ -275,25 +316,27 @@ export default {
     /**
      * Ajout des urgences sur la map
      */
-    initUrgences() {
+    async initUrgences() {
       this.urgencesLayer = L.layerGroup().addTo(this.map);
-      this.urgences.forEach((urgence) => {
-        const objetFeu = this.initIconFeu(urgence.incident)
+
+      for (let urgence of this.urgences) {
+        const objetFeu = this.initIconFeu(urgence.incident);
         const marqueur = L.marker(
           [urgence.incident.latitude, urgence.incident.longitude],
           {
             icon: objetFeu.icon,
           }
         );
+
         this.marqueursFeux.push(marqueur);
 
-        /** Recherche du chemin vers le centre la plus proche */
-        marqueur.on("click", () => {
-          this.trouveCheminLePlusProche(marqueur.getLatLng(), urgence);
-        });
         this.urgencesLayer.addLayer(objetFeu.cercleFeu);
         this.urgencesLayer.addLayer(marqueur);
-      });
+        this.trouveCheminLePlusProche(marqueur.getLatLng(), urgence);
+        await new Promise((resolve) => {
+          setTimeout(() => resolve(), 5000);
+        });
+      }
       this.layerControlFiltres.addOverlay(this.urgencesLayer, "urgences");
     },
     initLayerControl() {
@@ -303,7 +346,7 @@ export default {
       return {
         cercleFeu: L.circle(
           [incident.latitude, incident.longitude],
-          incident.radius * 2000,
+          incident.radius * 2,
           {
             color: "red",
             fillColor: "red",
@@ -315,6 +358,47 @@ export default {
           iconSize: [15, 15],
         }),
       };
+    },
+    initIconCapteur(capteur) {
+      if (capteur.capteurDonnees[0].valeur !== 0) {
+        return {
+          cercleIntensite: L.circle(
+            [
+              capteur.microcontrolleur.latitude,
+              capteur.microcontrolleur.longitude,
+            ],
+            0,
+            {
+              color: "#32DE8A",
+              fillColor: "#32DE8A",
+              opacity: 0.5,
+            }
+          ),
+          icon: L.icon({
+            iconUrl: "./images/sensor.png",
+            iconSize: [15, 15],
+          }),
+        };
+      } else {
+        return {
+          cercleIntensite: L.circle(
+            [
+              capteur.microcontrolleur.latitude,
+              capteur.microcontrolleur.longitude,
+            ],
+            capteur.radius * 2,
+            {
+              color: "#32DE8A",
+              fillColor: "#32DE8A",
+              opacity: 0.5,
+            }
+          ),
+          icon: L.icon({
+            iconUrl: "./images/sensor-activated.png",
+            iconSize: [15, 15],
+          }),
+        };
+      }
     },
     /**
      * @param {Object} caserne
@@ -342,20 +426,6 @@ export default {
       this.marqueursCasernes.push(marker);
       return marker;
     },
-    trouveMarqueurCaserne(coordonnes) {
-      this.marqueursCasernes.forEach((marqueur) => {
-        if (
-          this.estMarqueurSurPosition(
-            marqueur,
-            coordonnes.coordinates[0],
-            coordonnes.coordinates[1]
-          )
-        ) {
-          return marqueur;
-        }
-      });
-    },
-    updateMarqueurCaserne() {},
     /**
      * @param {Object} caserne
      */
@@ -406,7 +476,7 @@ export default {
      * @param {Number[]} coordonnes
      */
     trouveCheminLePlusProche(coordonnes, urgence) {
-      urgence.ressources.forEach((vehicule) => {
+      urgence.ressources[0].vehicules.forEach((vehicule) => {
         try {
           const waypoints = [
             L.latLng(vehicule.centre.latitude, vehicule.centre.longitude),
