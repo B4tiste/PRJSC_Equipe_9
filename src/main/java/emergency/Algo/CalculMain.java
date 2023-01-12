@@ -98,7 +98,16 @@ public class CalculMain {
             {
 
                 System.out.println("Incendie en : " + "("+couple[0] + " " + couple[1]+") d'une intensitÃ© de : " +intensite );
-                fires.add(new Trouple(-1, couple[0],couple[1],intensite));
+
+                try {
+                    if(couple[0]>0.0)
+                    {
+                        fires.add(new Trouple(-1, couple[0],couple[1],intensite));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+
             }
         }
         db_e.saveValuesFires(fires);

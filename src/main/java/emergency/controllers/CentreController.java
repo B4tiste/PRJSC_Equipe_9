@@ -88,7 +88,7 @@ public class CentreController extends emergency.controllers.BaseController {
         }
     }
 
-    @PostMapping("/UpdateCentres")
+    @PostMapping("/UpdateCenters")
     public ResponseEntity<List<CentreDto>> UpdateCentres(@RequestBody List<CentreDto> centres)
     {
         try {

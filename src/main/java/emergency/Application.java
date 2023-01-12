@@ -19,7 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 @EntityScan(basePackages = {"emergency.models", "emergency.models.sensorRelated"})
 @ComponentScan(basePackages = {
 		"emergency.controllers", "emergency.services", "emergency.services.type", "emergency.services.referentiel", "emergency.repositories", "emergency.repositories.type", "emergency.repositories.referentiel",
-		"emergency.modelDto", "emergency.modelDto.sensorRelated", "emergency.mapper", "emergency.baseReferentiel"
+		"emergency.modelDto", "emergency.modelDto.sensorRelated", "emergency.mapper", "emergency.baseReferentiel",
+		"emergency.configuration"
 })
 public class Application {
 

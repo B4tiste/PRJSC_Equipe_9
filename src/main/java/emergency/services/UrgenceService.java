@@ -21,13 +21,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
 public class UrgenceService extends BaseService {
 
     public final int VEHICULE_RES = 5;
-    public UrgenceService(UrgenceRepository urgenceRepository, VehicleService vehicleService, TypeRessourceService typeRessourceService, TypeUrgenceService typeUrgenceService, IncidentService incidentService, AdresseService adresseService, PrioriteService prioriteService, StatutService statutService) {
+    public UrgenceService(UrgenceRepository urgenceRepository, CentreService centreService, VehicleService vehicleService, TypeRessourceService typeRessourceService, TypeUrgenceService typeUrgenceService, IncidentService incidentService, AdresseService adresseService, PrioriteService prioriteService, StatutService statutService) {
         this.typeRessourceService = typeRessourceService;
         this.typeUrgenceService = typeUrgenceService;
         this.incidentService = incidentService;
@@ -37,10 +38,14 @@ public class UrgenceService extends BaseService {
         this.baseRepository = urgenceRepository;
         this.urgenceRepository = urgenceRepository;
         this.vehicleService = vehicleService;
+        this.centreService = centreService;
     }
 
     @Autowired
     public TypeRessourceService typeRessourceService;
+
+    @Autowired
+    public CentreService centreService;
     @Autowired
     public VehicleService vehicleService;
     @Autowired
@@ -241,7 +246,10 @@ public class UrgenceService extends BaseService {
                                 {
                                     filled_res = filled_res + nv;
                                     var centre = vehicule.getCentre();
-
+                                    if(res.getCentre()==null)
+                                    {
+                                        res.setCentre(centre);
+                                    }
                                     var res_c = centre.getRessource();
                                     if(res_c != null)
                                     {
@@ -254,6 +262,7 @@ public class UrgenceService extends BaseService {
                                                     ReferentielDefinitions.getStatut(STATUT_RESSOURCE.En_DEPLACEMENT_RETOUR.name())
                                             );
                                             res_c.get(0).getVehicules().add(vehicule);
+                                            this.centreService.CreateOrUpdateOrGet(centre);
 
                                         }
                                     }
@@ -302,13 +311,27 @@ public class UrgenceService extends BaseService {
                                     {
                                         var vehicules_ur = res.get(0).getVehicules();
 
+                                        if(vehicules_ur == null)
+                                        {
+                                            vehicules_ur = new ArrayList<>();
+                                        }
+
                                         vehicle.setStatut(
                                                 ReferentielDefinitions.getStatut(STATUT_RESSOURCE.EN_DEPLACEMENT_ALLER.name())
                                         );
 
                                         vehicle.setAvailable(Boolean.FALSE);
-                                        res.get(0).getVehicules().remove(vehicle);
+                                        //res.get(0).getVehicules().remove(vehicle);
+                                        var ress = vehicle.getCentre().getRessource().get(0);
+                                        if(ress != null)
+                                        {
+                                            var veh = ress.getVehicules();
+                                            veh.remove(vehicle);
+                                            ress.setVehicules(veh);
+                                        }
+
                                         vehicle.setRessource(res.get(0));
+
                                         vehicules_ur.add(vehicle);
                                         res.get(0).setVehicules(vehicules_ur);
 

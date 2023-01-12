@@ -56,6 +56,30 @@ public class VehiculeController extends emergency.controllers.BaseController {
         }
     }
 
+    @GetMapping("/GetVehiculesEnCours")
+    public ResponseEntity<List<VehiculeDto>> GetVehiculesEnCours(@RequestParam(value = "OnlyId", defaultValue = "false") boolean OnlyId)
+    {
+        try {
+            var vehicules = this.vehiculeService.GetAll();
+
+            List<VehiculeDto> vehicules_d = new ArrayList<>();
+            for(var vehicule : vehicules)
+            {
+                var vehicule_b = (Vehicule)vehicule;
+                if(vehicule_b.isAvailable()==Boolean.FALSE)
+                {
+                    vehicules_d.add((VehiculeDto)vehicule_b.toDto(OnlyId));
+                }
+
+            }
+
+            return (new ResponseEntity<List<VehiculeDto>>(vehicules_d, HttpStatus.OK));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return (new ResponseEntity<List<VehiculeDto>>(HttpStatus.NOT_FOUND));
+        }
+    }
+
     @GetMapping("/GetVehicule")
     public ResponseEntity<VehiculeDto> GetVehicule(
             @RequestParam(value = "OnlyId", defaultValue = "false") Boolean OnlyId,
@@ -130,14 +154,36 @@ public class VehiculeController extends emergency.controllers.BaseController {
         }
     }
 
+    @PutMapping("/UpdateVehiculeSimple")
+    public ResponseEntity<VehiculeDto> UpdateVehiculeSimple(
+            @RequestParam(value = "OnlyId", defaultValue = "false") Boolean OnlyId,
+            @RequestParam Long Id,
+            @RequestParam Double lat,
+            @RequestParam Double lng
+
+    )
+    {
+        try {
+
+            var vehicule_b = (Vehicule)this.vehiculeService.getById(Id);
+            vehicule_b.setLongitude(lng);
+            vehicule_b.setLatitude(lat);
+            var vehicule = (Vehicule)vehicule_b.Save(this.services, Boolean.FALSE);
+
+            return (new ResponseEntity<VehiculeDto>(vehicule.toDto(OnlyId), HttpStatus.OK));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return (new ResponseEntity<VehiculeDto>(HttpStatus.NOT_FOUND));
+        }
+    }
+
     @PutMapping("/UpdateVehiculePosition")
     public ResponseEntity<VehiculeDto> UpdateVehiculePosition(
             @RequestParam(value = "OnlyId", defaultValue = "false") Boolean OnlyId,
             @RequestParam(value = "Id") Long Id,
             @RequestParam(value = "latitude") Double latitude,
             @RequestParam(value = "longitude") Double longitude
-
-
     )
     {
         try {

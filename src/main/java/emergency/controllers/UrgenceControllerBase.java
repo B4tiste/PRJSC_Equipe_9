@@ -148,6 +148,23 @@ public class UrgenceControllerBase extends emergency.controllers.BaseController 
         }
     }
 
+    @PutMapping("/StateEndUrgency")
+    public ResponseEntity<Boolean> StateEndUrgency(
+            @RequestParam Long idUrgence
+    )
+    {
+        try {
+            var urgence_get = (Urgence)this.urgenceService.getById(idUrgence);
+            this.urgenceService.Delete(urgence_get);
+
+            return (new ResponseEntity<Boolean>(Boolean.TRUE, HttpStatus.OK));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return (new ResponseEntity<Boolean>(Boolean.FALSE, HttpStatus.NOT_FOUND));
+        }
+    }
+
     @PostMapping("/FillFireUrgency")
     public ResponseEntity<UrgenceDto> FillUrgency(
             @RequestBody UrgenceDto urgence,

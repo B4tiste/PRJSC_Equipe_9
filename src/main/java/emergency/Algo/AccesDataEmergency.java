@@ -45,12 +45,16 @@ public class AccesDataEmergency {
         List<Trouple> tr = new ArrayList<>();
         for(var cap : capteurs)
         {
-            tr.add(new Trouple(
-                    Long.valueOf(cap.getId()).intValue(),
-                    cap.getMicrocontroller().getLongitude(),
-                    cap.getMicrocontroller().getLatitude(),
-                    Integer.parseInt(cap.getCapteurDonnees().get(0).getValeur())
-            ));
+            if(Integer.parseInt(cap.getCapteurDonnees().get(0).getValeur())>0)
+            {
+                tr.add(new Trouple(
+                        Long.valueOf(cap.getId()).intValue(),
+                        cap.getMicrocontroller().getLongitude(),
+                        cap.getMicrocontroller().getLatitude(),
+                        Integer.parseInt(cap.getCapteurDonnees().get(0).getValeur())
+                ));
+            }
+
         }
 
         return tr;

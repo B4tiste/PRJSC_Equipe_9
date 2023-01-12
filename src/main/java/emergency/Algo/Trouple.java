@@ -1,12 +1,19 @@
 package emergency.Algo;
 
 public class Trouple {
-    private double x;
-    private double y;
-    private int idSensor;
-    private int intensite;
-    private double distanceUnitaire = 1;
-    private double rayon_max = 9 * distanceUnitaire;
+    public double x;
+    public double y;
+    public int idSensor;
+    public int intensite;
+    private double distanceUnitaire = Trouple.distanceUnitaireBase;
+    private double rayon_max = 9 * Trouple.distanceUnitaireBase;
+
+    public static double distanceUnitaireBase = 1.0;
+
+    public static void calcDistanceUnitaire(double meters)
+    {
+        Trouple.distanceUnitaireBase = meters / 9.0;
+    }
 
     /**
      * @param x
@@ -19,6 +26,11 @@ public class Trouple {
         this.y = y;
         this.intensite = intensite;
         this.idSensor = idSensor;
+    }
+
+    public Trouple()
+    {
+
     }
 
     /**
@@ -52,6 +64,12 @@ public class Trouple {
     {
         return rayon_max - this.intensite * distanceUnitaire;
     }
+
+    public double getCustomRayon(Double dis)
+    {
+        return this.intensite / 9.0 * dis;
+    }
+
 
     public void setIntensite(int intensite)
     {
