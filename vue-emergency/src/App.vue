@@ -9,12 +9,6 @@
       :port="port"
       @update:camions="onUpdateCamions"
     />
-    <!-- <RecapRessources
-      id="recapRessources"
-      :centres="centres"
-      :urgences="urgences"
-      :camions="camions"
-    /> -->
     <Loader :chargement="chargement" />
   </div>
 </template>
@@ -36,7 +30,7 @@ export default {
       urgences: [],
       camions: [],
       capteurs: [],
-      adresseIp: "192.168.157.139",
+      adresseIp: "176.191.15.114",
       port: "9090",
       chargement: true
     };
@@ -46,7 +40,7 @@ export default {
     await Promise.all([
       this.chargementCentres(),
       this.chargementUrgences(),
-      this.chargementCapteurs(),
+      this.chargementCapteurs()
     ]).then(() => {
       this.chargement = false;
     });
@@ -58,7 +52,7 @@ export default {
         this.chargementCapteurs(),
         this.chargementUrgences()
       ])
-    }, 10000)
+    }, 20000)
 
   },
   methods: {
@@ -75,6 +69,7 @@ export default {
     },
     async chargementUrgences() {
       try {
+        this.urgences = [];
         const response = await axios.get(
           `http://${this.adresseIp}:${this.port}/UrgenceManager/Urgence/GetUrgencies?OnlyId=false`
         );

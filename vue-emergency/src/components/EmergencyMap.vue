@@ -7,6 +7,8 @@ import * as turf from "@turf/turf";
 import L from "leaflet";
 import "leaflet-routing-machine";
 import TypeRessource from "./../enums/TypeRessource";
+import StatutRessource from "./../enums/StatutRessource";
+import axios from "axios";
 
 export default {
   data() {
@@ -19,6 +21,7 @@ export default {
       casernesLayer: null,
       /** @type {L.layerGroup} */
       urgencesLayer: null,
+      camionArretLayer: null,
       casernesInactivesLayer: null,
       zoom: 15,
       minZoom: 10,
@@ -87,6 +90,9 @@ export default {
       overlay: [],
       layerControlFiltres: L.control.layers(),
       layerControlRecentrer: L.control.layers(),
+      camions: [],
+      feux: [],
+      routingLayers: [],
     };
   },
   props: {
@@ -110,12 +116,15 @@ export default {
   },
   watch: {
     centres() {
+      this.camionArretLayer = L.layerGroup();
       this.initCentres();
     },
     urgences() {
       if (this.urgencesLayer === null) {
+        this.urgencesLayer = L.layerGroup();
         this.initUrgences();
       } else {
+        this.urgencesLayer.clearLayers();
         this.updateUrgences();
       }
     },
@@ -270,25 +279,87 @@ export default {
             /** Microcontrolleur KO */
             this.capteursLayer.removeLayer(layer);
           }
-          if (layer instanceof L.Circle) {
-            // layer.setStyle({
-            //   color: "red",
-            //   fillColor: "#f03",
-            //   fillOpacity: 0.5,
-            //   radius: 0,
-            // });
-          }
+        });
       });
-      })
     },
     updateUrgences() {
-      
+      console.log("Mise à jour des urgences");
+
+      this.urgencesLayer.addTo(this.map);
+      this.routingLayers.forEach((routingLayer) =>
+        routingLayer.routingLayer.remove(this.map)
+      );
+      this.urgences.forEach(async (urgence) => {
+        const objetFeu = this.initIconFeu(urgence.incident);
+        const marqueur = L.marker(
+          [urgence.incident.latitude, urgence.incident.longitude],
+          {
+            icon: objetFeu.icon,
+          }
+        );
+
+        this.urgencesLayer.addLayer(objetFeu.cercleFeu);
+        this.urgencesLayer.addLayer(marqueur);
+        this.trouveCheminLePlusProche(marqueur.getLatLng(), urgence);
+        await new Promise((resolve) => {
+          setTimeout(() => resolve(), 4000);
+        });
+
+        if (this.includesObject(urgence.incident, this.feux)) {
+          this.urgencesLayer.eachLayer((layer) => {
+            if (
+              urgence.incident.latitude == layer.getLatLng().lat &&
+              urgence.incident.longitude == layer.getLatLng().lng
+            ) {
+              if (layer instanceof L.Circle) {
+                layer.setRadius(layer.getRadius() * 1.2);
+              }
+            }
+          });
+        }
+
+        if (this.ressourcesAutourFeu(urgence.incident)) {
+          this.urgencesLayer.eachLayer((layer) => {
+            if (
+              urgence.incident.latitude === layer.getLatLng().lat &&
+              urgence.incident.longitude === layer.getLatLng().lng
+            ) {
+              if (layer instanceof L.Circle) {
+                layer.setRadius(layer.getRadius() * 0.85);
+              }
+            }
+          });
+        }
+      });
+    },
+    includesObject(obj, list) {
+      var i;
+      for (i = 0; i < list.length; i++) {
+        if (list[i].id === obj.id) {
+          return true;
+        }
+      }
+      return false;
+    },
+    ressourcesAutourFeu(incident) {
+      this.camions.forEach((camion) => {
+        if (
+          incident.latitude === camion.getLatLng().lat &&
+          incident.longitude === camion.getLatLng().lng
+        ) {
+          return true;
+        }
+      });
+
+      return false;
     },
     /**
-     * @param {L.Routing.RouteSelectedEvent} e
+     * 
+     * @param {*} e 
+     * @param {*} routingLayer 
+     * @param {*} vehicule 
      */
-    onRouteSelectedEvent(e) {
-      // TODO faire appels api pour l'envoie des ressources
+    onRouteSelectedEvent(e, routingLayer, vehicule) {
       /** Envoie des ressources */
       var camion = {
         position: L.marker(e.route.coordinates[0], {
@@ -298,7 +369,10 @@ export default {
 
       camion.position.addTo(this.map);
       e.route.coordinates.forEach((coord, index) => {
-        setTimeout(() => {
+        if (index % 4 == 0) {
+          axios.put(`http://${this.adresseIp}:${this.port}/UrgenceManager/Vehicule/UpdateVehiculePosition?OnlyId=false&Id=${vehicule.id}&latitude=${coord.lat}&longitude=${coord.lng}`)
+        }
+        setTimeout(async () => {
           camion.position.setLatLng([coord.lat, coord.lng]);
 
           if (
@@ -308,7 +382,15 @@ export default {
               e.route.coordinates[e.route.coordinates.length - 1].lng
             )
           ) {
-            camion.position.setIcon(this.icons.camionEau);
+            this.camions.push(camion.position);
+            this.map.removeLayer(camion.position)
+            console.log(vehicule)
+            axios.put(`http://${this.adresseIp}:${this.port}/UrgenceManager/Vehicule/UpdateVehiculeStateToAvailable?OnlyId=false&Id=${vehicule.id}`)
+            axios.put(`http://${this.adresseIp}:${this.port}/UrgenceManager/Vehicule/UpdateVehiculePosition?OnlyId=false&Id=${vehicule.id}&latitude=${vehicule.centre.latitude}&longitude=${vehicule.centre.longitude}`)
+
+            
+            this.camionArretLayer.addLayer(camion.position)
+            this.map.removeControl(routingLayer);
           }
         }, 300 * index);
       });
@@ -317,25 +399,26 @@ export default {
      * Ajout des urgences sur la map
      */
     async initUrgences() {
-      this.urgencesLayer = L.layerGroup().addTo(this.map);
-
+      this.urgencesLayer.addTo(this.map);
       for (let urgence of this.urgences) {
-        const objetFeu = this.initIconFeu(urgence.incident);
-        const marqueur = L.marker(
-          [urgence.incident.latitude, urgence.incident.longitude],
-          {
-            icon: objetFeu.icon,
-          }
-        );
+        if (urgence.incident.radius > 0) {
+          const objetFeu = this.initIconFeu(urgence.incident);
+          const marqueur = L.marker(
+            [urgence.incident.latitude, urgence.incident.longitude],
+            {
+              icon: objetFeu.icon,
+            }
+          );
 
-        this.marqueursFeux.push(marqueur);
+          this.feux.push(urgence.incident);
 
-        this.urgencesLayer.addLayer(objetFeu.cercleFeu);
-        this.urgencesLayer.addLayer(marqueur);
-        this.trouveCheminLePlusProche(marqueur.getLatLng(), urgence);
-        await new Promise((resolve) => {
-          setTimeout(() => resolve(), 5000);
-        });
+          this.urgencesLayer.addLayer(objetFeu.cercleFeu);
+          this.urgencesLayer.addLayer(marqueur);
+          this.trouveCheminLePlusProche(marqueur.getLatLng(), urgence);
+          await new Promise((resolve) => {
+            setTimeout(() => resolve(), 4000);
+          });
+        }
       }
       this.layerControlFiltres.addOverlay(this.urgencesLayer, "urgences");
     },
@@ -346,7 +429,7 @@ export default {
       return {
         cercleFeu: L.circle(
           [incident.latitude, incident.longitude],
-          incident.radius * 2,
+          incident.radius,
           {
             color: "red",
             fillColor: "red",
@@ -477,24 +560,36 @@ export default {
      */
     trouveCheminLePlusProche(coordonnes, urgence) {
       urgence.ressources[0].vehicules.forEach((vehicule) => {
-        try {
-          const waypoints = [
-            L.latLng(vehicule.centre.latitude, vehicule.centre.longitude),
-            L.latLng(coordonnes.lat, coordonnes.lng),
-          ];
+          console.log(vehicule);
+          if (
+            vehicule.statut.nom === StatutRessource.EN_DEPLACEMENT_ALLER ||
+            vehicule.statut.nom === StatutRessource.EN_DEPLACEMENT_RETOUR
+          ) {
+            clearInterval();
+            try {
+              const waypoints = [
+                L.latLng(vehicule.latitude, vehicule.longitude),
+                L.latLng(coordonnes.lat, coordonnes.lng),
+              ];
 
-          const routingLayer = this.initRoutingLayer();
+              const routingLayer = this.initRoutingLayer();
 
-          /** Ecoute de l'évènement "routeselected" */
-          routingLayer.on("routeselected", (e) => {
-            this.onRouteSelectedEvent(e);
-          });
+              this.routingLayers.push({
+                id: urgence.incidentId,
+                routingLayer: routingLayer,
+              });
 
-          this.ajouteRouteSurMap(routingLayer, waypoints);
-        } catch (error) {
-          console.warn(error);
-          console.warn("Aucune caserne à disponibilité");
-        }
+              /** Ecoute de l'évènement "routeselected" */
+              routingLayer.on("routeselected", (e) => {
+                this.onRouteSelectedEvent(e, routingLayer, vehicule);
+              });
+
+              this.ajouteRouteSurMap(routingLayer, waypoints);
+            } catch (error) {
+              console.warn(error);
+              console.warn("Aucune caserne à disponibilité");
+            }
+          }
       });
     },
     ajouteRouteSurMap(routingLayer, waypoints) {
@@ -529,53 +624,5 @@ export default {
 #map {
   width: 100%;
   height: 100%;
-}
-
-.localisation {
-  display: flex;
-  position: absolute;
-  justify-content: center;
-  align-items: center;
-  width: 64px;
-  height: 64px;
-  border-radius: 50px;
-  background-color: white;
-  z-index: 100;
-  cursor: pointer;
-  transition: 0.3s background-color;
-  right: 15px;
-  box-shadow: 0px 0px 8px 0px var(--manatee);
-}
-
-.localisation::after {
-  visibility: hidden;
-  background-color: var(--white-bg);
-  color: var(--indigo);
-  font-family: var(--font-family-title);
-  font-size: 14px;
-  font-weight: bold;
-  padding: 5px 20px;
-}
-
-.localisation {
-  bottom: 20px;
-}
-
-.localisation::after {
-  content: "Recentrer";
-  position: absolute;
-  top: 32px;
-  transform: translateY(-50%);
-  right: 70px;
-}
-
-.localisation:hover::after {
-  visibility: visible;
-  transition: 0.3s;
-}
-
-.localisation:hover {
-  background-color: #e0e0e0;
-  transition: 0.3s background-color;
 }
 </style>
