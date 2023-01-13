@@ -135,12 +135,36 @@ export default {
         this.updateCapteurs();
       }
     },
+    cptCamions() {
+      if (this.cptCamions === this.camionsEnRoute.length) {
+        // lancer la suppression des feux
+        console.log("supression des feux")
+        this.supprimerFeux();
+      }
+    }
   },
   mounted() {
     this.initMap();
     this.initLayerControl();
+
+    setTimeout(()=>{
+      this.supprimerFeux()
+    }, 50000)
   },
   methods: {
+    supprimerFeux() {
+      this.urgencesLayer.eachLayer((feu) => {
+        this.camionsEnRoute.forEach((camion) => {
+          if (feu instanceof L.Marker) {
+
+            if (camion.getLatLng().lat == feu.getLatLng().lat
+            && camion.getLatLng().lon == feu.getLatLng().lng) {
+              this.urgencesLayer.removeLayer(feu);
+            }
+          }
+        })
+      })
+    },
     initMap() {
       const credits =
         /* html */
@@ -392,7 +416,7 @@ export default {
             this.camionArretLayer.addLayer(camion.position)
             this.map.removeControl(routingLayer);
           }
-        }, 300 * index);
+        }, 150 * index);
       });
     },
     /**
