@@ -385,7 +385,7 @@ export default {
             this.camions.push(camion.position);
             this.map.removeLayer(camion.position)
             console.log(vehicule)
-            axios.put(`http://${this.adresseIp}:${this.port}/UrgenceManager/Vehicule/UpdateVehiculeStateToAvailable?OnlyId=false&Id=${vehicule.id}`)
+            axios.put(`http://${this.adresseIp}:${this.port}/UrgenceManager/Vehicule/UpdateVehiculeStateToAvailable?OnlyId=false&Id=${vehicule.id}`);
             axios.put(`http://${this.adresseIp}:${this.port}/UrgenceManager/Vehicule/UpdateVehiculePosition?OnlyId=false&Id=${vehicule.id}&latitude=${vehicule.centre.latitude}&longitude=${vehicule.centre.longitude}`)
 
             
